@@ -15,6 +15,7 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+const Listing = require("./models/list.js");
 
 const listingsRouter = require("./routes/listing.js");//listing routes import
 const reviewsRouter = require("./routes/review.js");//review routes import
@@ -49,6 +50,18 @@ main().then((res) => {
 });
 async function main() {
     await mongoose.connect(dbUrl);
+    // Safe auto-seeding for fresh environments (e.g. Render production with 0 listings)
+    try {
+        const count = await Listing.countDocuments();
+        if (count === 0) {
+            console.log("[Auto-Seed] Database has 0 listings. Populating initial vacation rentals...");
+            const { seedDatabase } = require("./scripts/seedDatabase.js");
+            await seedDatabase(dbUrl, false);
+            console.log("[Auto-Seed] Initial database seeding completed successfully.");
+        }
+    } catch (seedErr) {
+        console.error("[Auto-Seed] Notice: Automatic initial seeding skipped or failed:", seedErr.message);
+    }
 };
 
 const store = MongoStore.create({

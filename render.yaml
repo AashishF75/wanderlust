@@ -3,7 +3,7 @@ services:
     name: wanderlust
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && node backend/scripts/seedDatabase.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV
