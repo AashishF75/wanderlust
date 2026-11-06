@@ -1,0 +1,59 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+                <div>
+                    <h2 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Messages</h2>
+                    <p class="text-muted small m-0">Direct guest-host communications regarding stays and check-in logistics.</p>
+                </div>
+            </div>
+
+            <!-- Conversations List -->
+            <% if (conversations.length === 0) { %>
+                <div class="card border rounded-4 shadow-sm p-5 text-center bg-white">
+                    <div class="mb-3 text-muted" style="font-size: 3rem;">
+                        <i class="fa-regular fa-comments"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1">No conversations yet</h4>
+                    <p class="text-secondary small mb-3">When you message a property host or receive an inquiry, your conversations will appear here.</p>
+                    <a href="/listings" class="btn btn-dark rounded-pill px-4 py-2 small align-self-center">
+                        Explore Stays
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="list-group rounded-4 shadow-sm border overflow-hidden">
+                    <% for (let c of conversations) { %>
+                        <a href="/messages/thread?<%= c.listing ? `listingId=${c.listing._id}&` : '' %>userId=<%= c.otherUser._id %>" 
+                           class="list-group-item list-group-item-action p-3 border-bottom d-flex align-items-center gap-3">
+                            <!-- Avatar -->
+                            <div class="user-avatar-circle" style="width: 48px; height: 48px; font-size: 1.1rem; flex-shrink: 0;">
+                                <%= c.otherUser.username.charAt(0).toUpperCase() %>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold m-0 text-dark"><%= c.otherUser.username %></h6>
+                                    <span class="text-muted smaller"><%= new Date(c.lastMessage.createdAt).toLocaleDateString() %></span>
+                                </div>
+                                <% if (c.listing) { %>
+                                    <div class="smaller text-muted mb-1 text-truncate">
+                                        <i class="fa-solid fa-house-chimney me-1 text-accent"></i> Re: <%= c.listing.title %>
+                                    </div>
+                                <% } %>
+                                <p class="text-secondary small m-0 text-truncate"><%= c.lastMessage.content %></p>
+                            </div>
+
+                            <% if (c.unreadCount > 0) { %>
+                                <span class="badge bg-danger rounded-pill px-2 py-1 small">New</span>
+                            <% } %>
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

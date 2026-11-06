@@ -1,0 +1,77 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+                <div>
+                    <h2 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Notifications</h2>
+                    <p class="text-muted small m-0">Stay updated on booking confirmations, trip cancellations, and reviews.</p>
+                </div>
+                <% if (notifications.length > 0 && unreadCount > 0) { %>
+                    <form method="POST" action="/notifications/read-all?_method=PATCH">
+                        <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1">
+                            <i class="fa-solid fa-check-double me-1"></i> Mark all read
+                        </button>
+                    </form>
+                <% } %>
+            </div>
+
+            <% if (notifications.length === 0) { %>
+                <div class="card border rounded-4 shadow-sm p-5 text-center bg-white">
+                    <div class="mb-3 text-muted" style="font-size: 3rem;">
+                        <i class="fa-regular fa-bell"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1">No notifications yet</h4>
+                    <p class="text-secondary small mb-3">When you make reservations or receive host messages, updates will appear here.</p>
+                    <a href="/listings" class="btn btn-dark rounded-pill px-4 py-2 small align-self-center">
+                        Explore Stays
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="list-group rounded-4 shadow-sm border overflow-hidden">
+                    <% for (let n of notifications) { %>
+                        <div class="list-group-item p-3 border-bottom d-flex align-items-start gap-3 <%= n.isRead ? 'bg-white' : 'bg-light' %>">
+                            <!-- Notification Type Icon -->
+                            <div class="p-2 rounded-circle flex-shrink-0 mt-1" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: <%= n.type === 'booking_confirmed' ? '#D1FAE5' : (n.type === 'booking_cancelled' ? '#FEE2E2' : '#E0E7FF') %>; color: <%= n.type === 'booking_confirmed' ? '#065F46' : (n.type === 'booking_cancelled' ? '#991B1B' : '#3730A3') %>;">
+                                <% if (n.type === 'booking_confirmed') { %>
+                                    <i class="fa-solid fa-circle-check"></i>
+                                <% } else if (n.type === 'booking_cancelled') { %>
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                <% } else if (n.type === 'message_received') { %>
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                <% } else if (n.type === 'review_posted') { %>
+                                    <i class="fa-solid fa-star"></i>
+                                <% } else { %>
+                                    <i class="fa-solid fa-bell"></i>
+                                <% } %>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold m-0 <%= n.isRead ? 'text-secondary' : 'text-dark' %>"><%= n.title %></h6>
+                                    <span class="text-muted smaller"><%= new Date(n.createdAt).toLocaleDateString() %></span>
+                                </div>
+                                <p class="text-secondary small mb-2"><%= n.message %></p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="<%= n.link || '#' %>" class="small fw-semibold text-decoration-none" style="color: var(--c-primary);">
+                                        View Details &rarr;
+                                    </a>
+                                    <% if (!n.isRead) { %>
+                                        <form method="POST" action="/notifications/<%= n._id %>/read?_method=PATCH" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-link text-muted p-0 ms-3 smaller text-decoration-none">
+                                                Mark as read
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+

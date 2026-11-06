@@ -1,0 +1,41 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-brand-badge">
+            <i class="fa-solid fa-compass"></i>
+        </div>
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">Log in to manage your bookings, wishlists, and hosted properties.</p>
+
+        <form action="/login" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold small text-muted">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-regular fa-user"></i></span>
+                    <input type="text" name="username" class="form-control border-start-0 ps-0" id="username" placeholder="Enter your username" required>
+                    <div class="invalid-feedback">Please enter your username.</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between">
+                    <label for="password" class="form-label fw-semibold small text-muted">Password</label>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control border-start-0 ps-0" id="password" placeholder="Enter your password" required>
+                    <div class="invalid-feedback">Please enter your password.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-auth-primary mb-3">
+                Log In
+            </button>
+        </form>
+
+        <div class="text-center small text-muted mt-3 pt-3 border-top">
+            Don't have an account? <a href="/signup" class="fw-bold text-dark text-decoration-underline">Sign up for Wanderlust</a>
+        </div>
+    </div>
+</div>

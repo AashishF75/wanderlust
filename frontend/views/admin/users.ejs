@@ -1,0 +1,74 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <a href="/admin" class="text-decoration-none text-muted small fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Dashboard
+            </a>
+            <h2 class="fw-bold mt-2 mb-1" style="color: var(--c-primary);">User Management</h2>
+            <p class="text-muted small m-0">Manage registered member roles, permissions, and accounts (<%= users.length %> users total).</p>
+        </div>
+    </div>
+
+    <div class="card border rounded-4 shadow-sm bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Email</th>
+                        <th>Current Role</th>
+                        <th>Change Role</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let u of users) { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="user-avatar-circle" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                        <%= u.username.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark"><%= u.username %></div>
+                                        <div class="text-muted smaller">ID: <%= u._id.toString().slice(-6) %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="small text-secondary"><%= u.email %></td>
+                            <td>
+                                <span class="badge bg-<%= u.role === 'admin' ? 'danger' : (u.role === 'host' ? 'success' : 'secondary') %>-subtle text-<%= u.role === 'admin' ? 'danger' : (u.role === 'host' ? 'success' : 'secondary') %> rounded-pill px-3 py-1 small fw-bold">
+                                    <%= u.role || 'guest' %>
+                                </span>
+                            </td>
+                            <td>
+                                <form method="POST" action="/admin/users/<%= u._id %>/role?_method=PATCH" class="d-flex gap-1 align-items-center">
+                                    <select name="role" class="form-select form-select-sm rounded-pill" style="max-width: 130px;">
+                                        <option value="guest" <%= u.role === 'guest' ? 'selected' : '' %>>Guest</option>
+                                        <option value="host" <%= u.role === 'host' ? 'selected' : '' %>>Host</option>
+                                        <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-dark rounded-pill px-3">Update</button>
+                                </form>
+                            </td>
+                            <td class="text-end pe-4">
+                                <% if (!curruser._id.equals(u._id)) { %>
+                                    <form method="POST" action="/admin/users/<%= u._id %>?_method=DELETE" onsubmit="return confirm('Delete this user account? All their data will be permanently removed.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="badge bg-light text-muted border">You</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

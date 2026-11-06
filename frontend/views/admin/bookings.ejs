@@ -1,0 +1,83 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+        <div>
+            <a href="/admin" class="text-decoration-none text-muted small fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Dashboard
+            </a>
+            <h2 class="fw-bold mt-2 mb-1" style="color: var(--c-primary);">Booking Overviews</h2>
+            <p class="text-muted small m-0">Review all customer stays placed across the platform (<%= bookings.length %> total bookings).</p>
+        </div>
+        <!-- Status Filter Pills -->
+        <div class="d-flex gap-1">
+            <a href="/admin/bookings" class="btn btn-sm <%= selectedStatus === 'all' ? 'btn-dark' : 'btn-outline-dark' %> rounded-pill px-3">All</a>
+            <a href="/admin/bookings?status=Confirmed" class="btn btn-sm <%= selectedStatus === 'Confirmed' ? 'btn-success' : 'btn-outline-success' %> rounded-pill px-3">Confirmed</a>
+            <a href="/admin/bookings?status=Cancelled" class="btn btn-sm <%= selectedStatus === 'Cancelled' ? 'btn-danger' : 'btn-outline-danger' %> rounded-pill px-3">Cancelled</a>
+            <a href="/admin/bookings?status=Pending" class="btn btn-sm <%= selectedStatus === 'Pending' ? 'btn-warning' : 'btn-outline-warning' %> rounded-pill px-3">Pending</a>
+        </div>
+    </div>
+
+    <div class="card border rounded-4 shadow-sm bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Booking Ref</th>
+                        <th>Property</th>
+                        <th>Guest</th>
+                        <th>Dates & Nights</th>
+                        <th>Total Paid</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let b of bookings) { %>
+                        <tr>
+                            <td class="ps-4 fw-bold small text-muted">
+                                #WL-<%= b._id.toString().slice(-8).toUpperCase() %>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark text-truncate" style="max-width: 220px;">
+                                    <%= b.listing ? b.listing.title : 'Deleted Property' %>
+                                </div>
+                                <div class="text-muted smaller">
+                                    <%= b.listing ? b.listing.location : '' %>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark"><%= b.user ? b.user.username : 'Guest' %></div>
+                                <div class="text-muted smaller"><%= b.user ? b.user.email : '' %></div>
+                            </td>
+                            <td class="small">
+                                <div class="fw-semibold text-dark">
+                                    <%= new Date(b.checkIn).toLocaleDateString() %> &rarr; <%= new Date(b.checkOut).toLocaleDateString() %>
+                                </div>
+                                <div class="text-muted smaller"><%= b.nights %> nights &bull; <%= b.guests %> guests</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold" style="color: var(--c-primary);">&#8377; <%= b.totalPrice.toLocaleString("en-IN") %></div>
+                                <div class="text-muted smaller"><%= b.paymentStatus %></div>
+                            </td>
+                            <td>
+                                <span class="badge bg-<%= b.status === 'Confirmed' ? 'success' : (b.status === 'Cancelled' ? 'danger' : 'warning') %>-subtle text-<%= b.status === 'Confirmed' ? 'success' : (b.status === 'Cancelled' ? 'danger' : 'warning-emphasis') %> rounded-pill px-3 py-1 small">
+                                    <%= b.status %>
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="/bookings/<%= b._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                    Receipt
+                                </a>
+                            </td>
+                        </tr>
+                    <% } %>
+                    <% if (bookings.length === 0) { %>
+                        <tr><td colspan="7" class="text-center text-muted py-4">No reservations matching this criteria.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

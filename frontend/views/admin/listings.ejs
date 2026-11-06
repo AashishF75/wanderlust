@@ -1,0 +1,77 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <a href="/admin" class="text-decoration-none text-muted small fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Dashboard
+            </a>
+            <h2 class="fw-bold mt-2 mb-1" style="color: var(--c-primary);">Listing Moderation</h2>
+            <p class="text-muted small m-0">Oversee all vacation properties posted across Wanderlust (<%= listings.length %> properties).</p>
+        </div>
+    </div>
+
+    <div class="card border rounded-4 shadow-sm bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Property</th>
+                        <th>Owner</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Rating</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let l of listings) { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="<%= l.image && l.image.url ? l.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80' %>" 
+                                         class="rounded-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover;" 
+                                         alt="">
+                                    <div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 250px;">
+                                            <a href="/listings/<%= l._id %>" class="text-dark text-decoration-none"><%= l.title %></a>
+                                        </div>
+                                        <div class="text-muted smaller">
+                                            <i class="fa-solid fa-location-dot text-danger me-1"></i><%= l.location %>, <%= l.country %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="small">
+                                <div class="fw-semibold text-dark"><%= l.owner ? l.owner.username : 'Unknown' %></div>
+                                <div class="text-muted smaller"><%= l.owner ? l.owner.email : '' %></div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border rounded-pill px-2 py-1 small">
+                                    <%= l.category || 'General' %>
+                                </span>
+                            </td>
+                            <td class="fw-bold" style="color: var(--c-primary);">&#8377; <%= l.price ? l.price.toLocaleString("en-IN") : '0' %></td>
+                            <td class="small">
+                                <i class="fa-solid fa-star text-warning me-1"></i>
+                                <%= l.averageRating || '4.9' %>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="/listings/<%= l._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">View</a>
+                                    <form method="POST" action="/admin/listings/<%= l._id %>?_method=DELETE" onsubmit="return confirm('Permanently remove this listing as administrator?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Delete Listing">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

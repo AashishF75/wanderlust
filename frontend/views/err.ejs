@@ -1,0 +1,17 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5 py-5 text-center">
+    <div class="card p-5 rounded-4 border shadow-sm mx-auto bg-white" style="max-width: 540px;">
+        <div class="mb-3 text-danger fs-1">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="fw-bold mb-2 text-dark">Something Went Wrong</h3>
+        <p class="text-secondary mb-4 fs-6">
+            <%= message || "We ran into an unexpected error while processing your request." %>
+        </p>
+        <div>
+            <a href="/listings" class="btn btn-dark rounded-pill px-4 py-2 me-2">Back to Explore</a>
+            <button onclick="window.history.back()" class="btn btn-outline-secondary rounded-pill px-4 py-2">Go Back</button>
+        </div>
+    </div>
+</div>

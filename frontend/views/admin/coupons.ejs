@@ -1,0 +1,111 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <a href="/admin" class="text-decoration-none text-muted small fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Dashboard
+            </a>
+            <h2 class="fw-bold mt-2 mb-1" style="color: var(--c-primary);">Coupons & Promotions</h2>
+            <p class="text-muted small m-0">Create promotional discount codes and manage campaign limits.</p>
+        </div>
+        <button class="btn btn-dark rounded-pill px-4 py-2 small fw-semibold" data-bs-toggle="collapse" data-bs-target="#newCouponCollapse">
+            <i class="fa-solid fa-plus me-1 text-accent"></i> Create New Coupon
+        </button>
+    </div>
+
+    <!-- Create Coupon Collapsible Form -->
+    <div class="collapse mb-4" id="newCouponCollapse">
+        <div class="card border rounded-4 shadow-sm p-4 bg-white">
+            <h4 class="fw-bold text-dark mb-3">Add Promotional Discount Code</h4>
+            <form action="/admin/coupons" method="POST" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">Coupon Code</label>
+                        <input type="text" name="code" class="form-control text-uppercase fw-bold" placeholder="e.g. WANDERLUST15" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">Discount Type</label>
+                        <select name="discountType" class="form-select">
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">Discount Value</label>
+                        <input type="number" name="discountValue" class="form-control" placeholder="e.g. 15 for 15% or 500 for ₹500" required min="1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Min Booking (₹)</label>
+                        <input type="number" name="minBookingAmount" class="form-control" value="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Max Discount Cap (₹)</label>
+                        <input type="number" name="maxDiscount" class="form-control" value="5000">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Usage Limit</label>
+                        <input type="number" name="usageLimit" class="form-control" value="100">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Expiration Date</label>
+                        <input type="date" name="expiresAt" class="form-control">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 fw-semibold">Publish Coupon</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-2 ms-2" data-bs-toggle="collapse" data-bs-target="#newCouponCollapse">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active Coupons Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <% for (let c of coupons) { %>
+            <div class="col">
+                <div class="card border rounded-4 p-4 shadow-sm bg-white h-100 d-flex flex-column" style="border-top: 4px solid var(--c-accent) !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge rounded-pill bg-dark px-3 py-1 font-monospace fs-6">
+                            <%= c.code %>
+                        </span>
+                        <span class="badge bg-<%= c.isActive ? 'success' : 'secondary' %>-subtle text-<%= c.isActive ? 'success' : 'secondary' %> rounded-pill px-2 py-1 small">
+                            <%= c.isActive ? 'Active' : 'Inactive' %>
+                        </span>
+                    </div>
+
+                    <h4 class="fw-bold my-2" style="color: var(--c-primary);">
+                        <%= c.discountType === 'percentage' ? `${c.discountValue}% OFF` : `₹ ${c.discountValue.toLocaleString("en-IN")} OFF` %>
+                    </h4>
+
+                    <div class="small text-secondary mb-3">
+                        <div>Min. Spend: &#8377; <%= c.minBookingAmount ? c.minBookingAmount.toLocaleString("en-IN") : '0' %></div>
+                        <% if (c.discountType === 'percentage') { %>
+                            <div>Max Cap: &#8377; <%= c.maxDiscount.toLocaleString("en-IN") %></div>
+                        <% } %>
+                        <div>Redeemed: <strong><%= c.usedCount %></strong> / <%= c.usageLimit %> times</div>
+                        <% if (c.expiresAt) { %>
+                            <div>Expires: <%= new Date(c.expiresAt).toLocaleDateString() %></div>
+                        <% } %>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top text-end">
+                        <form method="POST" action="/admin/coupons/<%= c._id %>?_method=DELETE" onsubmit="return confirm('Delete coupon <%= c.code %>?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                <i class="fa-solid fa-trash-can me-1"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+        <% if (coupons.length === 0) { %>
+            <div class="col-12 py-5 text-center text-muted">
+                <i class="fa-solid fa-ticket-simple fs-2 mb-2"></i>
+                <h5>No coupons created yet.</h5>
+                <p class="small">Click "Create New Coupon" to publish promotional discount codes.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+

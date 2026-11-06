@@ -1,0 +1,517 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- ==============================================================================
+     1. HERO SECTION (With Vacation Photography & Multi-Segment Search)
+     ============================================================================== -->
+<section class="hero-section text-center">
+    <div class="container">
+        <div class="hero-tag">
+            <i class="fa-solid fa-sparkles text-accent"></i> Curated Stays Worldwide
+        </div>
+        <h1 class="hero-title">
+            Find Your Place <span class="accent-text">in the World.</span>
+        </h1>
+        <p class="hero-subtitle">
+            Discover luxury beachfront villas, secluded mountain chalets, and private island retreats verified for authentic comfort and design.
+        </p>
+
+        <!-- Modern Multi-Segment Search Box -->
+        <form class="hero-search-box" action="/listings/search" method="GET">
+            <div class="row g-0 align-items-center">
+                <!-- Location Segment -->
+                <div class="col-lg-4 col-md-12 hero-search-segment">
+                    <label class="hero-search-label" for="heroLocation">Where</label>
+                    <input class="hero-search-control" type="text" id="heroLocation" name="q" placeholder="Search destinations (e.g. Goa, Paris)..." required>
+                </div>
+
+                <!-- Check In -->
+                <div class="col-lg-3 col-md-6 col-6 hero-search-segment">
+                    <label class="hero-search-label" for="heroCheckIn">Check in</label>
+                    <input class="hero-search-control" type="date" id="heroCheckIn" aria-label="Check in date">
+                </div>
+
+                <!-- Check Out -->
+                <div class="col-lg-3 col-md-6 col-6 hero-search-segment">
+                    <label class="hero-search-label" for="heroCheckOut">Check out</label>
+                    <input class="hero-search-control" type="date" id="heroCheckOut" aria-label="Check out date">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-lg-2 col-md-12 p-2 text-center text-lg-end">
+                    <button class="hero-submit-btn w-100" type="submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Popular Destination Quick Chips -->
+        <div class="quick-chips">
+            <span class="text-white-50 small me-2">Popular:</span>
+            <a href="/listings/search?q=Goa" class="quick-chip">Goa</a>
+            <a href="/listings/search?q=Paris" class="quick-chip">Paris</a>
+            <a href="/listings/search?q=Bali" class="quick-chip">Bali</a>
+            <a href="/listings/search?q=Manali" class="quick-chip">Manali</a>
+            <a href="/listings/search?q=Dubai" class="quick-chip">Dubai</a>
+            <a href="/listings/search?q=Switzerland" class="quick-chip">Switzerland</a>
+            <a href="/listings/search?q=Santorini" class="quick-chip">Santorini</a>
+        </div>
+    </div>
+</section>
+
+<!-- ==============================================================================
+     2. CATEGORY FILTER NAVIGATION BAR & CONTROLS
+     ============================================================================== -->
+<div class="container">
+    <div class="category-bar-wrapper">
+        <!-- Horizontal Scrollable Category Pills -->
+        <div class="category-scroll-container">
+            <a href="/listings" class="cat-pill <%= !category ? 'active' : '' %>">
+                <i class="fa-solid fa-border-all"></i>
+                <span>All</span>
+            </a>
+            <a href="/listings?category=Trending" class="cat-pill <%= category === 'Trending' ? 'active' : '' %>">
+                <i class="fa-solid fa-fire"></i>
+                <span>Trending</span>
+            </a>
+            <a href="/listings?category=Room" class="cat-pill <%= category === 'Room' ? 'active' : '' %>">
+                <i class="fa-solid fa-bed"></i>
+                <span>Rooms</span>
+            </a>
+            <a href="/listings?category=City" class="cat-pill <%= category === 'City' ? 'active' : '' %>">
+                <i class="fa-solid fa-city"></i>
+                <span>Iconic Cities</span>
+            </a>
+            <a href="/listings?category=Mountain" class="cat-pill <%= category === 'Mountain' ? 'active' : '' %>">
+                <i class="fa-solid fa-mountain"></i>
+                <span>Mountain</span>
+            </a>
+            <a href="/listings?category=Cottage" class="cat-pill <%= category === 'Cottage' ? 'active' : '' %>">
+                <i class="fa-solid fa-house"></i>
+                <span>Cottages</span>
+            </a>
+            <a href="/listings?category=Pool" class="cat-pill <%= category === 'Pool' ? 'active' : '' %>">
+                <i class="fa-solid fa-person-swimming"></i>
+                <span>Amazing Pools</span>
+            </a>
+            <a href="/listings?category=Farms" class="cat-pill <%= category === 'Farms' ? 'active' : '' %>">
+                <i class="fa-solid fa-tractor"></i>
+                <span>Countryside</span>
+            </a>
+            <a href="/listings?category=Camping" class="cat-pill <%= category === 'Camping' ? 'active' : '' %>">
+                <i class="fa-solid fa-campground"></i>
+                <span>Camping</span>
+            </a>
+            <a href="/listings?category=Arctic" class="cat-pill <%= category === 'Arctic' ? 'active' : '' %>">
+                <i class="fa-solid fa-snowflake"></i>
+                <span>Arctic</span>
+            </a>
+            <a href="/listings?category=Doms" class="cat-pill <%= category === 'Doms' ? 'active' : '' %>">
+                <i class="fa-solid fa-landmark-dome"></i>
+                <span>Domes</span>
+            </a>
+            <a href="/listings?category=Sailboats" class="cat-pill <%= category === 'Sailboats' ? 'active' : '' %>">
+                <i class="fa-solid fa-sailboat"></i>
+                <span>Islands & Boats</span>
+            </a>
+        </div>
+
+        <!-- Filter, Map & Tax Toggles -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Filters</span>
+                <% 
+                   let activeFilterCount = 0;
+                   if (typeof minPrice !== 'undefined' && minPrice) activeFilterCount++;
+                   if (typeof maxPrice !== 'undefined' && maxPrice) activeFilterCount++;
+                   if (typeof guests !== 'undefined' && guests) activeFilterCount++;
+                   if (typeof selectedAmenities !== 'undefined' && selectedAmenities.length > 0) activeFilterCount += selectedAmenities.length;
+                   if (typeof sort !== 'undefined' && sort && sort !== 'newest') activeFilterCount++;
+                %>
+                <% if (activeFilterCount > 0) { %>
+                    <span class="badge rounded-pill bg-dark text-white"><%= activeFilterCount %></span>
+                <% } %>
+            </button>
+
+            <a href="/listings/map" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-accent"></i>
+                <span class="d-none d-sm-inline">Map View</span>
+            </a>
+
+            <!-- Total After Taxes Toggle -->
+            <div class="tax-toggle-wrapper ms-1">
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="taxSwitchToggle">
+                    <label class="form-check-label small" for="taxSwitchToggle">Taxes</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================================
+     FILTER MODAL (Multi-Param Search, Price, Capacity, Amenities, Sorting)
+     ============================================================================== -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <form action="/listings" method="GET">
+                <% if (category) { %>
+                    <input type="hidden" name="category" value="<%= category %>">
+                <% } %>
+                <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                    <input type="hidden" name="q" value="<%= searchQuery %>">
+                <% } %>
+
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <h5 class="modal-title fw-bold text-dark" id="filterModalLabel">
+                        <i class="fa-solid fa-sliders me-2 text-accent"></i> Filters & Preferences
+                    </h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- Price Range -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark d-block mb-2">Price Range per Night (&#8377;)</label>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">&#8377;</span>
+                                    <input type="number" class="form-control border-start-0" name="minPrice" placeholder="Minimum" value="<%= typeof minPrice !== 'undefined' ? minPrice : '' %>" min="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">&#8377;</span>
+                                    <input type="number" class="form-control border-start-0" name="maxPrice" placeholder="Maximum" value="<%= typeof maxPrice !== 'undefined' ? maxPrice : '' %>" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guest Capacity -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark d-block mb-2">Guests Capacity</label>
+                        <div class="row g-2">
+                            <% [1, 2, 4, 6, 8].forEach(count => { %>
+                                <div class="col">
+                                    <input type="radio" class="btn-check" name="guests" id="guests-<%= count %>" value="<%= count %>" <%= (typeof guests !== 'undefined' && String(guests) === String(count)) ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-secondary w-100 rounded-pill py-2 small fw-semibold" for="guests-<%= count %>">
+                                        <%= count %>+ <%= count === 1 ? 'Guest' : 'Guests' %>
+                                    </label>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+
+                    <!-- Sorting -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark d-block mb-2">Sort Results By</label>
+                        <select class="form-select rounded-3 py-2" name="sort">
+                            <option value="newest" <%= (typeof sort !== 'undefined' && sort === 'newest') ? 'selected' : '' %>>Newest Listings First</option>
+                            <option value="price_asc" <%= (typeof sort !== 'undefined' && sort === 'price_asc') ? 'selected' : '' %>>Price: Low to High</option>
+                            <option value="price_desc" <%= (typeof sort !== 'undefined' && sort === 'price_desc') ? 'selected' : '' %>>Price: High to Low</option>
+                            <option value="rating_desc" <%= (typeof sort !== 'undefined' && sort === 'rating_desc') ? 'selected' : '' %>>Top Rated First</option>
+                        </select>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark d-block mb-2">Popular Amenities</label>
+                        <div class="row g-2">
+                            <% 
+                            const availableAmenities = [
+                                "WiFi", "Kitchen", "Free parking", "Air conditioning", 
+                                "Pool", "Dedicated workspace", "TV", "Washer", 
+                                "Hot tub", "Balcony", "BBQ grill", "Pet friendly"
+                            ];
+                            const curAmenities = (typeof selectedAmenities !== 'undefined' && Array.isArray(selectedAmenities)) ? selectedAmenities : [];
+                            availableAmenities.forEach(item => {
+                                const checked = curAmenities.includes(item);
+                            %>
+                                <div class="col-md-4 col-6">
+                                    <div class="form-check p-2 border rounded-3 bg-light">
+                                        <input class="form-check-input ms-1 me-2" type="checkbox" name="amenities" value="<%= item %>" id="amenity-<%= item %>" <%= checked ? 'checked' : '' %>>
+                                        <label class="form-check-label small fw-medium text-dark" for="amenity-<%= item %>">
+                                            <%= item %>
+                                        </label>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-between">
+                    <a href="/listings" class="btn btn-outline-secondary rounded-pill px-4">Clear All</a>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4 fw-bold">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================================
+     RECENTLY VIEWED PROPERTIES (Session-based)
+     ============================================================================== -->
+<% if (typeof recentlyViewedListings !== 'undefined' && recentlyViewedListings && recentlyViewedListings.length > 0) { %>
+<div class="container mb-4">
+    <div class="p-3 bg-white rounded-4 border shadow-sm">
+        <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+            <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-accent"></i> Recently Viewed Stays
+            </h6>
+            <span class="text-muted smaller"><%= recentlyViewedListings.length %> saved in your session</span>
+        </div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2">
+            <% for (let rList of recentlyViewedListings) { %>
+                <div class="col">
+                    <a href="/listings/<%= rList._id %>" class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden bg-light">
+                            <img src="<%= rList.image ? rList.image.url : 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80' %>" class="card-img-top" alt="<%= rList.title %>" style="height: 100px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <h6 class="text-dark small fw-bold text-truncate mb-1"><%= rList.title %></h6>
+                                <p class="text-muted smaller mb-1 text-truncate"><%= rList.location %></p>
+                                <div class="fw-bold text-dark smaller">&#8377; <%= rList.price ? rList.price.toLocaleString("en-IN") : '0' %> <span class="fw-normal text-muted">/ night</span></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<!-- ==============================================================================
+     3. FEATURED VACATION RENTALS GRID
+     ============================================================================== -->
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">
+                <%= category ? category + ' Stays' : 'Featured Places to Stay' %>
+            </h2>
+            <p class="text-muted small m-0">
+                Explore handpicked vacation rentals with verified hosts and precision maps.
+            </p>
+        </div>
+        <% if (category) { %>
+            <a href="/listings" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="fa-solid fa-xmark me-1"></i> Clear Filter
+            </a>
+        <% } %>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        <% if (alllistings && alllistings.length > 0) { %>
+            <% for (let list of alllistings) { %>
+                <div class="col">
+                    <div class="property-card">
+                        <!-- Media Container with Wishlist Button & Category Badge -->
+                        <div class="card-media-wrapper">
+                            <a href="/listings/<%= list._id %>" class="d-block w-100 h-100">
+                                <img src="<%= list.image.url %>" class="property-img" alt="<%= list.title %>" loading="lazy">
+                            </a>
+
+                            <!-- Wishlist Heart Button -->
+                            <% const saved = isWishlisted(list._id); %>
+                            <button class="wishlist-btn <%= saved ? 'active' : '' %>" 
+                                    type="button" 
+                                    aria-label="<%= saved ? 'Remove from Wishlist' : 'Save to Wishlist' %>"
+                                    title="<%= saved ? 'Remove from Wishlist' : 'Save to Wishlist' %>"
+                                    data-listing-id="<%= list._id %>"
+                                    data-is-wishlisted="<%= saved ? 'true' : 'false' %>"
+                                    onclick="handleWishlistToggle(event, this)">
+                                <i class="<%= saved ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>" style="<%= saved ? 'color: #ff385c;' : '' %>"></i>
+                            </button>
+
+                            <!-- Category Badge -->
+                            <% if (list.category) { %>
+                                <div class="card-category-badge">
+                                    <%= list.category %>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="card-content-body">
+                            <a href="/listings/<%= list._id %>" class="text-decoration-none">
+                                <div class="card-header-row">
+                                    <h6 class="card-location">
+                                        <i class="fa-solid fa-location-dot me-1 text-danger small"></i>
+                                        <%= list.location %>, <%= list.country %>
+                                    </h6>
+                                    <div class="card-rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        <span><%= list.reviews && list.reviews.length > 0 ? (list.reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / list.reviews.length).toFixed(1) : '4.9' %></span>
+                                    </div>
+                                </div>
+
+                                <h5 class="property-title">
+                                    <%= list.title %>
+                                </h5>
+                            </a>
+
+                            <div class="card-price-row">
+                                <span class="card-price-strong">&#8377; <%= list.price ? list.price.toLocaleString("en-IN") : '0' %></span>
+                                <span>/ night</span>
+                                <span class="tax-info">+18% GST (Total: &#8377; <%= list.price ? Math.round(list.price * 1.18).toLocaleString("en-IN") : '0' %>)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="col-12 py-5 text-center">
+                <div class="p-5 bg-white rounded-4 border mx-auto" style="max-width: 540px;">
+                    <div class="fs-1 text-muted mb-3"><i class="fa-solid fa-compass-slash"></i></div>
+                    <h4 class="fw-bold text-dark mb-2">No vacation rentals found</h4>
+                    <p class="text-muted mb-4">We couldn't find any properties matching your current filter. Try searching for a different destination or view all listings.</p>
+                    <a href="/listings" class="btn btn-dark rounded-pill px-4 py-2">Explore All Stays</a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- ==============================================================================
+     4. WHY CHOOSE WANDERLUST SECTION
+     ============================================================================== -->
+<div class="container">
+    <section class="value-props-section text-center">
+        <div class="section-tag">The Wanderlust Advantage</div>
+        <h3 class="section-title">Designed for Exceptional Travel</h3>
+        <div class="row g-4 text-start">
+            <div class="col-md-6 col-lg-3">
+                <div class="value-card">
+                    <div class="value-icon-box">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h5>Verified Quality Homes</h5>
+                    <p>Every vacation rental is vetted for architectural character, cleanliness, and premium host standards.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="value-card">
+                    <div class="value-icon-box" style="background-color: var(--c-accent);">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h5>Precision Mapbox Views</h5>
+                    <p>Accurate neighborhood coordinates and street views ensure zero surprises when arriving at your stay.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="value-card">
+                    <div class="value-icon-box">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h5>Direct Cloud Media</h5>
+                    <p>High-resolution Cloudinary photography presents authentic perspectives without misleading filters.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="value-card">
+                    <div class="value-icon-box" style="background-color: var(--c-accent);">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h5>24/7 Dedicated Support</h5>
+                    <p>Round-the-clock host and traveler assistance ensures smooth check-ins and worry-free vacations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ==============================================================================
+     5. TRAVELER TESTIMONIALS SECTION
+     ============================================================================== -->
+<div class="container">
+    <section class="testimonials-section">
+        <div class="text-center mb-4">
+            <div class="section-tag">Guest Experiences</div>
+            <h3 class="section-title">Loved by Travelers Worldwide</h3>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The Candolim beach villa in Goa was beyond magical. Watching Arabian Sea sunsets from the private infinity pool made this our best family vacation ever."
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="testimonial-avatar" alt="Aarohi Sharma">
+                        <div>
+                            <div class="fw-bold small text-dark">Aarohi Sharma</div>
+                            <div class="text-muted smaller">Stayed in Goa, India</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The Matterhorn chalet in Zermatt was immaculate. Waking up to panoramic snow-covered Swiss Alps peaks with hot cocoa by the cedar fireplace was unforgettable."
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" class="testimonial-avatar" alt="Marcus Lindqvist">
+                        <div>
+                            <div class="fw-bold small text-dark">Marcus Lindqvist</div>
+                            <div class="text-muted smaller">Stayed in Zermatt, Switzerland</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div>
+                        <div class="testimonial-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "Booking our bamboo villa in Bali through Wanderlust was effortless. The Mapbox precision coordinates guided our driver right to the front courtyard gate."
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" class="testimonial-avatar" alt="Priya Patel">
+                        <div>
+                            <div class="fw-bold small text-dark">Priya Patel</div>
+                            <div class="text-muted smaller">Stayed in Ubud, Bali</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ==============================================================================
+     CLIENT INTERACTIVITY SCRIPTS: TAX TOGGLE
+     ============================================================================== -->
+<script>
+    // Tax Calculation Toggle
+    const taxToggle = document.getElementById('taxSwitchToggle');
+    if (taxToggle) {
+        taxToggle.addEventListener('change', () => {
+            const taxElements = document.querySelectorAll('.tax-info');
+            taxElements.forEach(el => {
+                el.style.display = taxToggle.checked ? 'inline' : 'none';
+            });
+        });
+    }
+</script>

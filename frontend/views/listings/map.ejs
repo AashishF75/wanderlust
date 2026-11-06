@@ -1,0 +1,98 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="map-explore-page">
+    <!-- Map Toolbar Header -->
+    <div class="container-fluid px-lg-4 py-3 bg-white border-bottom shadow-sm">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <span class="badge rounded-pill px-3 py-1 text-white me-2" style="background-color: var(--c-primary);">
+                    <i class="fa-solid fa-map-location-dot me-1 text-accent"></i> Map View
+                </span>
+                <span class="fw-bold text-dark fs-5">Interactive Stays Map</span>
+                <span class="text-muted small ms-2 d-none d-md-inline">(<%= alllistings.length %> geolocated properties)</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/listings" class="btn btn-outline-dark rounded-pill px-3 py-1 small fw-semibold">
+                    <i class="fa-solid fa-list me-1"></i> List View
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="exploreMap" style="width: 100%; height: calc(100vh - 170px); min-height: 500px;"></div>
+</div>
+
+<script>
+    const mapToken = "<%= MAP_TOKEN %>";
+    const listingsData = JSON.parse(`<%- JSON.stringify(alllistings) %>`);
+
+    mapboxgl.accessToken = mapToken;
+
+    // Center on India or first listing coordinates
+    let defaultCenter = [78.9629, 20.5937];
+    if (listingsData.length > 0 && listingsData[0].geometry && listingsData[0].geometry.coordinates) {
+        defaultCenter = listingsData[0].geometry.coordinates;
+    }
+
+    const map = new mapboxgl.Map({
+        container: 'exploreMap',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: defaultCenter,
+        zoom: 4.8
+    });
+
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+    // Add Price Markers
+    listingsData.forEach(item => {
+        if (!item.geometry || !item.geometry.coordinates || item.geometry.coordinates.length < 2) return;
+
+        // Custom Price Marker Element
+        const el = document.createElement('div');
+        el.className = 'map-price-marker';
+        el.innerHTML = `&#8377; ${item.price ? item.price.toLocaleString("en-IN") : '0'}`;
+
+        // Popup Card
+        const imgUrl = item.image && item.image.url ? item.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&q=80';
+        const rating = item.averageRating || '4.9';
+
+        const popupHTML = `
+            <div class="map-popup-card" style="width: 220px; font-family: 'Plus Jakarta Sans', sans-serif;">
+                <a href="/listings/${item._id}" style="text-decoration: none; color: inherit;">
+                    <img src="${imgUrl}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" alt="${item.title}">
+                    <div style="font-weight: 700; font-size: 0.95rem; line-height: 1.3; color: #252525; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${item.title}
+                    </div>
+                    <div style="font-size: 0.8rem; color: #6c757d; margin-bottom: 6px;">
+                        <i class="fa-solid fa-location-dot" style="color: #ff385c;"></i> ${item.location}, ${item.country}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 6px;">
+                        <span style="font-weight: 700; color: #253D35;">&#8377; ${item.price.toLocaleString("en-IN")} <span style="font-weight: normal; font-size: 0.75rem;">/ night</span></span>
+                        <span style="font-size: 0.8rem; font-weight: 600;"><i class="fa-solid fa-star" style="color: #f59e0b;"></i> ${rating}</span>
+                    </div>
+                </a>
+            </div>
+        `;
+
+        const popup = new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(popupHTML);
+
+        new mapboxgl.Marker(el)
+            .setLngLat(item.geometry.coordinates)
+            .setPopup(popup)
+            .addTo(map);
+    });
+
+    // Fit map bounds to encompass all listings
+    if (listingsData.length > 1) {
+        const bounds = new mapboxgl.LngLatBounds();
+        listingsData.forEach(item => {
+            if (item.geometry && item.geometry.coordinates) {
+                bounds.extend(item.geometry.coordinates);
+            }
+        });
+        map.fitBounds(bounds, { padding: 60, maxZoom: 12 });
+    }
+</script>
+

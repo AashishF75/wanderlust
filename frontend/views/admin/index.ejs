@@ -1,0 +1,159 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <!-- Admin Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 mb-4 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-2 text-white" style="background-color: var(--c-primary);">
+                    <i class="fa-solid fa-shield-halved me-1 text-accent"></i> Admin Console
+                </span>
+                <span class="text-muted small">Platform Overview & Telemetry</span>
+            </div>
+            <h1 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Wanderlust Administration</h1>
+            <p class="text-muted m-0">Monitor platform metrics, manage registered users, moderate properties, and oversee bookings.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/admin/users" class="btn btn-outline-dark rounded-pill px-3 py-2 small fw-semibold">
+                <i class="fa-solid fa-users me-1"></i> Users
+            </a>
+            <a href="/admin/listings" class="btn btn-outline-dark rounded-pill px-3 py-2 small fw-semibold">
+                <i class="fa-solid fa-building me-1"></i> Listings
+            </a>
+            <a href="/admin/bookings" class="btn btn-outline-dark rounded-pill px-3 py-2 small fw-semibold">
+                <i class="fa-solid fa-calendar-check me-1"></i> Bookings
+            </a>
+            <a href="/admin/coupons" class="btn btn-dark rounded-pill px-3 py-2 small fw-semibold">
+                <i class="fa-solid fa-ticket me-1 text-accent"></i> Coupons
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Metric Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Gross Payouts</span>
+                    <div class="p-2 rounded-circle bg-success-subtle text-success">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0" style="color: var(--c-primary);">&#8377; <%= stats.totalGrossRevenue.toLocaleString("en-IN") %></h3>
+                <span class="text-muted smaller">Total platform booking volume</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Commission</span>
+                    <div class="p-2 rounded-circle bg-warning-subtle text-warning-emphasis">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark">&#8377; <%= stats.platformCommission.toLocaleString("en-IN") %></h3>
+                <span class="text-muted smaller">5% service fee revenue</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Properties</span>
+                    <div class="p-2 rounded-circle bg-info-subtle text-info">
+                        <i class="fa-solid fa-house-chimney"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= stats.totalListings %></h3>
+                <span class="text-muted smaller">Active vacation listings</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Platform Users</span>
+                    <div class="p-2 rounded-circle bg-primary-subtle text-primary">
+                        <i class="fa-solid fa-user-group"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= stats.totalUsers %></h3>
+                <span class="text-muted smaller">Registered member accounts</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Platform Activity Split -->
+    <div class="row g-4">
+        <!-- Left: Recent Bookings -->
+        <div class="col-lg-7">
+            <div class="card border rounded-4 shadow-sm bg-white overflow-hidden h-100">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold m-0 text-dark">Recent Platform Reservations</h5>
+                    <a href="/admin/bookings" class="small fw-semibold text-decoration-none" style="color: var(--c-primary);">View All &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Property</th>
+                                <th>Guest</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for (let b of recentBookings) { %>
+                                <tr>
+                                    <td class="fw-semibold text-dark text-truncate" style="max-width: 180px;">
+                                        <%= b.listing ? b.listing.title : 'Deleted Listing' %>
+                                    </td>
+                                    <td><%= b.user ? b.user.username : 'Guest' %></td>
+                                    <td class="fw-bold" style="color: var(--c-primary);">&#8377; <%= b.totalPrice.toLocaleString("en-IN") %></td>
+                                    <td>
+                                        <span class="badge bg-<%= b.status === 'Confirmed' ? 'success' : (b.status === 'Cancelled' ? 'danger' : 'warning') %>-subtle text-<%= b.status === 'Confirmed' ? 'success' : (b.status === 'Cancelled' ? 'danger' : 'warning-emphasis') %> rounded-pill px-2 py-1">
+                                            <%= b.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% } %>
+                            <% if (recentBookings.length === 0) { %>
+                                <tr><td colspan="4" class="text-center text-muted py-3">No reservations on file.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Recent Users -->
+        <div class="col-lg-5">
+            <div class="card border rounded-4 shadow-sm bg-white overflow-hidden h-100">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold m-0 text-dark">Recent User Signups</h5>
+                    <a href="/admin/users" class="small fw-semibold text-decoration-none" style="color: var(--c-primary);">View All &rarr;</a>
+                </div>
+                <ul class="list-group list-group-flush small">
+                    <% for (let u of recentUsers) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="user-avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                    <%= u.username.charAt(0).toUpperCase() %>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark"><%= u.username %></div>
+                                    <div class="text-muted smaller"><%= u.email %></div>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 py-1">
+                                <%= u.role || 'guest' %>
+                            </span>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+

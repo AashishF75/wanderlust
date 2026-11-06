@@ -1,0 +1,224 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <!-- Breadcrumb / Back button -->
+    <div class="mb-4">
+        <a href="/bookings" class="text-decoration-none text-muted small fw-semibold">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to My Trips
+        </a>
+    </div>
+
+    <!-- Status Alert Header -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background-color: <%= booking.status === 'Cancelled' ? '#FFF5F5' : '#F4F9F6' %>; border-left: 6px solid <%= booking.status === 'Cancelled' ? '#E53E3E' : 'var(--c-primary)' %> !important;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <% if (booking.status === 'Confirmed') { %>
+                        <span class="badge rounded-pill bg-success px-3 py-2">
+                            <i class="fa-solid fa-circle-check me-1"></i> Reservation Confirmed
+                        </span>
+                    <% } else if (booking.status === 'Cancelled') { %>
+                        <span class="badge rounded-pill bg-danger px-3 py-2">
+                            <i class="fa-solid fa-circle-xmark me-1"></i> Reservation Cancelled
+                        </span>
+                    <% } else { %>
+                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                            <i class="fa-solid fa-clock me-1"></i> Pending Host Confirmation
+                        </span>
+                    <% } %>
+                    <span class="text-muted small">Booking Reference: <strong>#WL-<%= booking._id.toString().slice(-8).toUpperCase() %></strong></span>
+                </div>
+                <h2 class="fw-bold m-0" style="color: var(--c-primary);">
+                    <%= booking.status === 'Cancelled' ? 'Trip Cancelled' : 'Pack your bags, your trip is booked!' %>
+                </h2>
+                <p class="text-muted small m-0 mt-1">
+                    <%= booking.status === 'Cancelled' 
+                        ? 'This booking was cancelled and the reservation dates have been released.' 
+                        : 'A confirmation has been recorded and your host has been notified.' %>
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-dark rounded-pill px-3 py-2 small" onclick="window.print()">
+                    <i class="fa-solid fa-print me-1"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content 2-Column Split -->
+    <div class="row g-4">
+        <!-- Left Column: Property & Reservation Details -->
+        <div class="col-lg-7">
+            <!-- Property Overview Card -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white mb-4">
+                <div class="row g-3">
+                    <div class="col-sm-4">
+                        <img src="<%= booking.listing.image && booking.listing.image.url ? booking.listing.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=80' %>" 
+                             class="img-fluid rounded-3 w-100 h-100" 
+                             style="object-fit: cover; min-height: 140px;" 
+                             alt="<%= booking.listing.title %>">
+                    </div>
+                    <div class="col-sm-8 d-flex flex-column justify-content-center">
+                        <span class="badge bg-light text-dark border align-self-start mb-1 small">
+                            <%= booking.listing.category || 'Vacation Rental' %>
+                        </span>
+                        <h4 class="fw-bold mb-1 text-dark">
+                            <a href="/listings/<%= booking.listing._id %>" class="text-dark text-decoration-none">
+                                <%= booking.listing.title %>
+                            </a>
+                        </h4>
+                        <p class="text-muted small mb-2">
+                            <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                            <%= booking.listing.location %>, <%= booking.listing.country %>
+                        </p>
+                        <a href="/listings/<%= booking.listing._id %>" class="small fw-semibold text-decoration-underline" style="color: var(--c-primary);">
+                            View Property Details & Map &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stay Schedule Card -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white mb-4">
+                <h5 class="fw-bold mb-3 text-dark">Reservation Schedule</h5>
+                <div class="row g-3 text-center">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="text-muted smaller text-uppercase fw-bold mb-1">Check-in</div>
+                            <div class="fw-bold text-dark fs-5">
+                                <%= new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %>
+                            </div>
+                            <div class="text-muted smaller">After 3:00 PM</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="text-muted smaller text-uppercase fw-bold mb-1">Check-out</div>
+                            <div class="fw-bold text-dark fs-5">
+                                <%= new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %>
+                            </div>
+                            <div class="text-muted smaller">By 11:00 AM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-3 border-top d-flex justify-content-between small text-secondary">
+                    <span>Duration: <strong><%= booking.nights %> <%= booking.nights === 1 ? 'Night' : 'Nights' %></strong></span>
+                    <span>Guests: <strong><%= booking.guests %> <%= booking.guests === 1 ? 'Guest' : 'Guests' %></strong></span>
+                    <span>Booked on: <strong><%= new Date(booking.createdAt).toLocaleDateString() %></strong></span>
+                </div>
+            </div>
+
+            <!-- Host & Guest Information Card -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white mb-4">
+                <h5 class="fw-bold mb-3 text-dark">Party Details</h5>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted smaller fw-bold text-uppercase mb-1">Primary Guest</div>
+                            <div class="fw-bold text-dark"><%= booking.user.username %></div>
+                            <div class="text-muted small"><%= booking.user.email %></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted smaller fw-bold text-uppercase mb-1">Property Host</div>
+                            <div class="fw-bold text-dark">
+                                <%= booking.listing.owner ? booking.listing.owner.username : 'Wanderlust Superhost' %>
+                            </div>
+                            <div class="text-muted small">
+                                <%= booking.listing.owner ? booking.listing.owner.email : 'contact@wanderlust.travel' %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- House Rules & Policy -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white">
+                <h5 class="fw-bold mb-2 text-dark">Important Stay Information</h5>
+                <ul class="small text-secondary mb-0 ps-3" style="line-height: 1.8;">
+                    <li><strong>Check-in:</strong> Self check-in with keypad. Door code provided 24 hours prior to arrival.</li>
+                    <li><strong>Quiet Hours:</strong> Please respect neighborhood quiet hours from 10:00 PM to 8:00 AM.</li>
+                    <li><strong>No Smoking / Parties:</strong> Strictly non-smoking inside the premises. Unauthorized events are prohibited.</li>
+                    <li><strong>Cancellation Policy:</strong> Free cancellation anytime prior to check-in day.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column: Pricing & Actions -->
+        <div class="col-lg-5">
+            <!-- Price Breakdown Receipt Card -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white mb-4">
+                <h5 class="fw-bold mb-3 text-dark pb-2 border-bottom">Price Breakdown</h5>
+
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>&#8377; <%= (booking.basePrice / booking.nights).toLocaleString("en-IN") %> &times; <%= booking.nights %> nights</span>
+                        <span>&#8377; <%= booking.basePrice.toLocaleString("en-IN") %></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>Cleaning fee</span>
+                        <span>&#8377; <%= (booking.cleaningFee || 0).toLocaleString("en-IN") %></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>Wanderlust service fee (5%)</span>
+                        <span>&#8377; <%= (booking.serviceFee || 0).toLocaleString("en-IN") %></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>Occupancy taxes (18% GST)</span>
+                        <span>&#8377; <%= (booking.tax || 0).toLocaleString("en-IN") %></span>
+                    </div>
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-between fw-bold text-dark fs-5">
+                        <span>Total Amount</span>
+                        <span style="color: var(--c-primary);">&#8377; <%= booking.totalPrice.toLocaleString("en-IN") %></span>
+                    </div>
+                </div>
+
+                <!-- Payment Status Box -->
+                <div class="p-3 mt-4 rounded-3 border bg-light d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted smaller fw-bold text-uppercase">Payment Status</div>
+                        <div class="fw-semibold text-dark small">
+                            <% if (booking.paymentStatus === 'Paid') { %>
+                                <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Paid in Full</span>
+                            <% } else if (booking.paymentStatus === 'Refunded') { %>
+                                <span class="text-info"><i class="fa-solid fa-rotate-left me-1"></i> Refunded</span>
+                            <% } else { %>
+                                <span class="text-warning text-dark"><i class="fa-solid fa-receipt me-1"></i> Unpaid &bull; Pay at Check-in</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1 small">
+                        <%= booking.paymentStatus %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Management Actions Card -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-white">
+                <h6 class="fw-bold mb-3 text-dark">Reservation Actions</h6>
+                <div class="d-grid gap-2">
+                    <a href="/bookings" class="btn btn-dark rounded-pill py-2 fw-semibold">
+                        <i class="fa-solid fa-suitcase-rolling me-2"></i> View All My Trips
+                    </a>
+                    <a href="/listings" class="btn btn-outline-dark rounded-pill py-2 fw-semibold">
+                        <i class="fa-solid fa-compass me-2"></i> Browse More Stays
+                    </a>
+
+                    <!-- Cancellation Trigger -->
+                    <% if (booking.status !== 'Cancelled' && new Date(booking.checkIn) > new Date()) { %>
+                        <hr class="my-2">
+                        <form method="POST" action="/bookings/<%= booking._id %>/cancel?_method=PATCH" onsubmit="return confirm('Are you sure you want to cancel this reservation? The dates will be freed immediately.');">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill w-100 py-2">
+                                <i class="fa-solid fa-xmark me-2"></i> Cancel Reservation
+                            </button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

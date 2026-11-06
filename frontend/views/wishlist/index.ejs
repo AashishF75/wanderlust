@@ -1,0 +1,202 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 mb-4 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-2 text-white" style="background-color: var(--c-primary);">
+                    <i class="fa-solid fa-heart text-danger me-1"></i> Wishlist
+                </span>
+                <span class="text-muted small" id="wishlistCountLabel">
+                    <%= wishlistListings.length %> <%= wishlistListings.length === 1 ? 'property' : 'properties' %> saved
+                </span>
+            </div>
+            <h1 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Your Saved Stays</h1>
+            <p class="text-muted m-0">Handpicked vacation rentals you have bookmarked for upcoming adventures.</p>
+        </div>
+        <div>
+            <a href="/listings" class="btn btn-outline-dark rounded-pill px-4 py-2">
+                <i class="fa-solid fa-compass me-2"></i> Explore More Stays
+            </a>
+        </div>
+    </div>
+
+    <!-- Wishlist Cards Grid -->
+    <div id="wishlistGrid" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 <%= wishlistListings.length === 0 ? 'd-none' : '' %>">
+        <% for (let list of wishlistListings) { %>
+            <div class="col wishlist-item-col" id="wishlist-card-<%= list._id %>">
+                <div class="property-card h-100 d-flex flex-column">
+                    <!-- Media Container -->
+                    <div class="card-media-wrapper">
+                        <a href="/listings/<%= list._id %>" class="d-block w-100 h-100">
+                            <img src="<%= list.image && list.image.url ? list.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' %>" 
+                                 class="property-img" 
+                                 alt="<%= list.title %>" 
+                                 loading="lazy">
+                        </a>
+
+                        <!-- Quick Remove Heart Button -->
+                        <button class="wishlist-btn active" 
+                                type="button" 
+                                aria-label="Remove from Wishlist" 
+                                title="Remove from Wishlist"
+                                data-listing-id="<%= list._id %>"
+                                onclick="removeFromWishlistPage(event, '<%= list._id %>')">
+                            <i class="fa-solid fa-heart" style="color: #ff385c;"></i>
+                        </button>
+
+                        <!-- Category Badge -->
+                        <% if (list.category) { %>
+                            <div class="card-category-badge">
+                                <%= list.category %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Card Content -->
+                    <div class="card-content-body d-flex flex-column flex-grow-1">
+                        <a href="/listings/<%= list._id %>" class="text-decoration-none">
+                            <div class="card-header-row">
+                                <h6 class="card-location">
+                                    <i class="fa-solid fa-location-dot me-1 text-danger small"></i>
+                                    <%= list.location %>, <%= list.country %>
+                                </h6>
+                                <div class="card-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>
+                                        <%= list.reviews && list.reviews.length > 0 
+                                            ? (list.reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / list.reviews.length).toFixed(1) 
+                                            : '4.9' %>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <h5 class="property-title">
+                                <%= list.title %>
+                            </h5>
+                        </a>
+
+                        <div class="card-price-row mb-3">
+                            <span class="card-price-strong">&#8377; <%= list.price ? list.price.toLocaleString("en-IN") : '0' %></span>
+                            <span>/ night</span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-auto pt-3 border-top d-flex gap-2">
+                            <a href="/listings/<%= list._id %>" class="btn btn-sm btn-dark rounded-pill flex-grow-1 py-2 fw-semibold">
+                                View Stay
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 remove-btn" 
+                                    title="Remove from saved stays"
+                                    data-listing-id="<%= list._id %>"
+                                    onclick="removeFromWishlistPage(event, '<%= list._id %>')">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Empty State -->
+    <div id="wishlistEmptyState" class="py-5 text-center <%= wishlistListings.length > 0 ? 'd-none' : '' %>">
+        <div class="p-5 bg-white rounded-4 border mx-auto shadow-sm" style="max-width: 580px;">
+            <div class="mb-3" style="font-size: 3.5rem; color: var(--c-accent);">
+                <i class="fa-regular fa-heart"></i>
+            </div>
+            <h3 class="fw-bold mb-2 text-dark" style="letter-spacing: -0.5px;">Your wishlist is empty</h3>
+            <p class="text-secondary mb-4" style="line-height: 1.6;">
+                You haven't saved any vacation rentals yet. Explore our curated stays around the world and tap the heart icon on any card to save your dream destinations.
+            </p>
+            <a href="/listings" class="btn btn-dark rounded-pill px-5 py-2 fw-semibold shadow-sm">
+                <i class="fa-solid fa-compass me-2"></i> Explore Properties
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Wishlist Page Interactive Removal Script -->
+<script>
+    async function removeFromWishlistPage(event, listingId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const card = document.getElementById(`wishlist-card-${listingId}`);
+        if (!card) return;
+
+        // Disable buttons on card to prevent double clicks
+        const buttons = card.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+
+        try {
+            const res = await fetch(`/wishlist/${listingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.message || 'Failed to remove from wishlist');
+            }
+
+            const data = await res.json();
+
+            // Animate card removal
+            card.style.transition = 'all 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+
+            setTimeout(() => {
+                card.remove();
+
+                // Recalculate remaining items
+                const remaining = document.querySelectorAll('.wishlist-item-col');
+                const count = remaining.length;
+
+                // Update count labels
+                const label = document.getElementById('wishlistCountLabel');
+                if (label) {
+                    label.textContent = `${count} ${count === 1 ? 'property' : 'properties'} saved`;
+                }
+
+                // Update navbar badge if present
+                const navBadges = document.querySelectorAll('.navbar-nav .badge.bg-danger');
+                navBadges.forEach(nb => {
+                    if (count > 0) {
+                        nb.textContent = count;
+                    } else {
+                        nb.remove();
+                    }
+                });
+
+                // If no items remain, show empty state
+                if (count === 0) {
+                    const grid = document.getElementById('wishlistGrid');
+                    const empty = document.getElementById('wishlistEmptyState');
+                    if (grid) grid.classList.add('d-none');
+                    if (empty) empty.classList.remove('d-none');
+                }
+
+                if (window.showWanderlustToast) {
+                    window.showWanderlustToast('Property removed from your saved stays.', 'info');
+                }
+            }, 300);
+
+        } catch (err) {
+            console.error('Wishlist removal error:', err);
+            buttons.forEach(b => b.disabled = false);
+            if (window.showWanderlustToast) {
+                window.showWanderlustToast(err.message || 'Error updating wishlist', 'error');
+            } else {
+                alert(err.message || 'Error updating wishlist');
+            }
+        }
+    }
+</script>
+

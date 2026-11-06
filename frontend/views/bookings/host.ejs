@@ -1,0 +1,210 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 mb-4 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-2 text-white" style="background-color: var(--c-primary);">
+                    <i class="fa-solid fa-house-user me-1 text-accent"></i> Host Console
+                </span>
+                <span class="text-muted small">
+                    Managing <%= hostListings.length %> <%= hostListings.length === 1 ? 'property' : 'properties' %>
+                </span>
+            </div>
+            <h1 class="fw-bold mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Host Reservation Management</h1>
+            <p class="text-muted m-0">Review incoming guest reservations, manage stay requests, and track your property revenue.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/bookings/host/analytics" class="btn btn-outline-dark rounded-pill px-4 py-2">
+                <i class="fa-solid fa-chart-column me-2 text-accent"></i> Analytics & Charts
+            </a>
+            <a href="/listings/new" class="btn btn-dark rounded-pill px-4 py-2">
+                <i class="fa-solid fa-plus me-2 text-accent"></i> Add New Listing
+            </a>
+            <a href="/bookings" class="btn btn-outline-dark rounded-pill px-4 py-2">
+                <i class="fa-solid fa-suitcase-rolling me-2"></i> My Guest Trips
+            </a>
+        </div>
+    </div>
+
+    <!-- Revenue & Stats Summary Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Revenue</span>
+                    <div class="p-2 rounded-circle bg-success-subtle text-success">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0" style="color: var(--c-primary);">&#8377; <%= totalRevenue.toLocaleString("en-IN") %></h3>
+                <span class="text-muted smaller">Gross confirmed bookings</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Confirmed Stays</span>
+                    <div class="p-2 rounded-circle bg-primary-subtle text-primary">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= confirmedBookings.length %></h3>
+                <span class="text-muted smaller">Total confirmed reservations</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Pending Inquiries</span>
+                    <div class="p-2 rounded-circle bg-warning-subtle text-warning">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= pendingBookings.length %></h3>
+                <span class="text-muted smaller">Awaiting host action</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Upcoming Arrivals</span>
+                    <div class="p-2 rounded-circle bg-info-subtle text-info">
+                        <i class="fa-solid fa-plane-arrival"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= upcomingCheckins.length %></h3>
+                <span class="text-muted smaller">Future check-in guests</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incoming Reservations List -->
+    <div class="card border rounded-4 shadow-sm bg-white overflow-hidden mb-5">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h4 class="fw-bold m-0 text-dark">Guest Reservations</h4>
+                <p class="text-muted small m-0">All reservations placed across your hosted properties.</p>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                <%= incomingBookings.length %> total bookings
+            </span>
+        </div>
+
+        <% if (incomingBookings.length === 0) { %>
+            <div class="p-5 text-center">
+                <div class="mb-3 text-muted" style="font-size: 3rem;">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">No guest reservations yet</h5>
+                <p class="text-muted small mb-3">
+                    As travelers book your properties, their reservations, dates, and payout amounts will appear here.
+                </p>
+                <a href="/listings" class="btn btn-outline-dark rounded-pill px-4 py-2 small">
+                    View Your Listings
+                </a>
+            </div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-4">Property</th>
+                            <th>Guest</th>
+                            <th>Dates & Nights</th>
+                            <th>Guests</th>
+                            <th>Payout</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for (let b of incomingBookings) { %>
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="<%= b.listing && b.listing.image && b.listing.image.url ? b.listing.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80' %>" 
+                                             class="rounded-3" 
+                                             style="width: 50px; height: 50px; object-fit: cover;" 
+                                             alt="">
+                                        <div>
+                                            <div class="fw-bold text-dark text-truncate" style="max-width: 220px;">
+                                                <%= b.listing ? b.listing.title : 'Deleted Property' %>
+                                            </div>
+                                            <div class="text-muted smaller">
+                                                <%= b.listing ? `${b.listing.location}, ${b.listing.country}` : '' %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark"><%= b.user ? b.user.username : 'Guest' %></div>
+                                    <div class="text-muted smaller"><%= b.user ? b.user.email : '' %></div>
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold text-dark">
+                                        <%= new Date(b.checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %> &rarr;
+                                        <%= new Date(b.checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                                    </div>
+                                    <div class="text-muted smaller">
+                                        <%= b.nights %> <%= b.nights === 1 ? 'night' : 'nights' %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="small text-secondary"><%= b.guests %> <%= b.guests === 1 ? 'guest' : 'guests' %></span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" style="color: var(--c-primary);">&#8377; <%= b.totalPrice.toLocaleString("en-IN") %></div>
+                                    <div class="text-muted smaller"><%= b.paymentStatus %></div>
+                                </td>
+                                <td>
+                                    <% if (b.status === 'Confirmed') { %>
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 small">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Confirmed
+                                        </span>
+                                    <% } else if (b.status === 'Pending') { %>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2 py-1 small">
+                                            <i class="fa-solid fa-clock me-1"></i> Pending
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1 small">
+                                            <i class="fa-solid fa-xmark me-1"></i> Cancelled
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="/bookings/<%= b._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3" title="View Confirmation">
+                                            Details
+                                        </a>
+
+                                        <% if (b.status === 'Pending') { %>
+                                            <form method="POST" action="/bookings/<%= b._id %>/confirm?_method=PATCH" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" title="Confirm Booking">
+                                                    Accept
+                                                </button>
+                                            </form>
+                                        <% } %>
+
+                                        <% if (b.status !== 'Cancelled' && new Date(b.checkIn) > new Date()) { %>
+                                            <form method="POST" action="/bookings/<%= b._id %>/cancel?_method=PATCH" class="d-inline" onsubmit="return confirm('Cancel this reservation?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Cancel Booking">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+

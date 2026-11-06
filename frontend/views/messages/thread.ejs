@@ -1,0 +1,89 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border rounded-4 shadow-sm bg-white overflow-hidden d-flex flex-column" style="height: calc(100vh - 180px); min-height: 520px;">
+                <!-- Chat Header -->
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/messages" class="text-muted me-2" title="Back to Inbox">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                        <div class="user-avatar-circle" style="width: 38px; height: 38px; font-size: 0.9rem;">
+                            <%= otherUser.username.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold m-0 text-dark"><%= otherUser.username %></h6>
+                            <span class="text-muted smaller"><%= otherUser.role === 'host' ? 'Verified Host' : 'Guest Member' %></span>
+                        </div>
+                    </div>
+                    <% if (listing) { %>
+                        <div class="d-flex align-items-center gap-2 text-end">
+                            <img src="<%= listing.image && listing.image.url ? listing.image.url : '' %>" 
+                                 class="rounded-3" style="width: 36px; height: 36px; object-fit: cover;" alt="">
+                            <div class="d-none d-sm-block text-truncate" style="max-width: 180px;">
+                                <a href="/listings/<%= listing._id %>" class="small fw-semibold text-dark text-decoration-none">
+                                    <%= listing.title %>
+                                </a>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Chat Message Stream -->
+                <div class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-3" id="messageStream">
+                    <% if (messages.length === 0) { %>
+                        <div class="m-auto text-center text-muted py-5">
+                            <i class="fa-regular fa-comment-dots fs-1 mb-2"></i>
+                            <h6 class="fw-bold text-dark">Start a conversation</h6>
+                            <p class="small text-secondary">Ask questions about property rules, early check-in, or neighborhood tips.</p>
+                        </div>
+                    <% } else { %>
+                        <% for (let m of messages) { %>
+                            <% const isMe = m.sender._id.equals(curruser._id); %>
+                            <div class="d-flex flex-column <%= isMe ? 'align-items-end' : 'align-items-start' %>">
+                                <div class="p-3 rounded-4 small shadow-xs" 
+                                     style="max-width: 75%; background-color: <%= isMe ? 'var(--c-primary)' : '#f1f5f9' %>; color: <%= isMe ? '#FAF9F6' : '#1e293b' %>; border-bottom-<%= isMe ? 'right' : 'left' %>-radius: 4px;">
+                                    <%= m.content %>
+                                </div>
+                                <span class="smaller text-muted mt-1 px-1" style="font-size: 0.7rem;">
+                                    <%= new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                                </span>
+                            </div>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <!-- Chat Input Footer -->
+                <div class="p-3 border-top bg-white">
+                    <form action="/messages" method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="recipientId" value="<%= otherUser._id %>">
+                        <% if (listing) { %>
+                            <input type="hidden" name="listingId" value="<%= listing._id %>">
+                        <% } %>
+                        <input type="text" 
+                               name="content" 
+                               class="form-control rounded-pill px-4" 
+                               placeholder="Write a message to <%= otherUser.username %>..." 
+                               required 
+                               autocomplete="off" 
+                               autofocus>
+                        <button type="submit" class="btn btn-dark rounded-pill px-4" title="Send Message">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll chat stream to bottom on load
+    const stream = document.getElementById("messageStream");
+    if (stream) {
+        stream.scrollTop = stream.scrollHeight;
+    }
+</script>
+

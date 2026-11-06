@@ -1,0 +1,161 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 mb-4 border-bottom">
+        <div>
+            <a href="/bookings/host" class="text-decoration-none text-muted small fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Host Console
+            </a>
+            <h1 class="fw-bold mt-2 mb-1" style="color: var(--c-primary); letter-spacing: -0.5px;">Host Earnings & Analytics</h1>
+            <p class="text-muted small m-0">In-depth performance insights, monthly revenue trends, and property occupancy telemetry.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/bookings/host" class="btn btn-outline-dark rounded-pill px-4 py-2 small fw-semibold">
+                <i class="fa-solid fa-calendar-check me-1"></i> View Reservations
+            </a>
+            <a href="/listings/new" class="btn btn-dark rounded-pill px-4 py-2 small fw-semibold">
+                <i class="fa-solid fa-plus me-1 text-accent"></i> Add Listing
+            </a>
+        </div>
+    </div>
+
+    <!-- Analytics KPI Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Earnings</span>
+                    <div class="p-2 rounded-circle bg-success-subtle text-success">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0" style="color: var(--c-primary);">&#8377; <%= totalRevenue.toLocaleString("en-IN") %></h3>
+                <span class="text-muted smaller">Total confirmed reservations</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Occupancy Rate</span>
+                    <div class="p-2 rounded-circle bg-primary-subtle text-primary">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= occupancyRate %>%</h3>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar" style="width: <%= occupancyRate %>%; background-color: var(--c-primary);"></div>
+                </div>
+                <span class="text-muted smaller">Booked nights vs availability</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Avg. Booking Value</span>
+                    <div class="p-2 rounded-circle bg-warning-subtle text-warning-emphasis">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark">&#8377; <%= averageBookingValue.toLocaleString("en-IN") %></h3>
+                <span class="text-muted smaller">Average payout per guest stay</span>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border rounded-4 p-4 bg-white shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Nights Booked</span>
+                    <div class="p-2 rounded-circle bg-info-subtle text-info">
+                        <i class="fa-solid fa-moon"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold m-0 text-dark"><%= totalNightsBooked %></h3>
+                <span class="text-muted smaller">Total guest stay nights</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Earnings Chart Card -->
+    <div class="card border rounded-4 shadow-sm p-4 bg-white mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold m-0 text-dark">Monthly Revenue Performance</h4>
+                <p class="text-muted small m-0">Gross booking revenue distributed across calendar months.</p>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">Year <%= new Date().getFullYear() %></span>
+        </div>
+
+        <!-- CSS/HTML Bar Chart -->
+        <div class="d-flex align-items-end justify-content-between gap-2 pt-4 pb-2 border-bottom" style="height: 240px;">
+            <% const maxVal = Math.max(...Object.values(monthlyEarnings), 10000); %>
+            <% for (let m of months) { %>
+                <% const val = monthlyEarnings[m] || 0; %>
+                <% const heightPct = Math.max(8, Math.round((val / maxVal) * 100)); %>
+                <div class="d-flex flex-column align-items-center flex-grow-1" style="height: 100%; justify-content: flex-end;">
+                    <span class="smaller fw-bold text-dark mb-1" style="font-size: 0.7rem;">
+                        <%= val > 0 ? `₹${Math.round(val/1000)}k` : '' %>
+                    </span>
+                    <div class="w-100 rounded-top transition-fast" 
+                         style="height: <%= heightPct %>%; background-color: <%= val > 0 ? 'var(--c-primary)' : '#e2e8f0' %>; max-width: 44px; min-height: 8px;" 
+                         title="<%= m %>: ₹ <%= val.toLocaleString('en-IN') %>">
+                    </div>
+                    <span class="smaller text-muted mt-2 fw-semibold" style="font-size: 0.75rem;"><%= m %></span>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Properties Summary List -->
+    <div class="card border rounded-4 shadow-sm bg-white overflow-hidden">
+        <div class="p-4 border-bottom">
+            <h5 class="fw-bold m-0 text-dark">Hosted Properties Portfolio</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted">
+                    <tr>
+                        <th class="ps-4">Property</th>
+                        <th>Category</th>
+                        <th>Nightly Rate</th>
+                        <th>Capacity</th>
+                        <th>Rating</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let l of hostListings) { %>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="<%= l.image && l.image.url ? l.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80' %>" 
+                                         class="rounded-3" 
+                                         style="width: 45px; height: 45px; object-fit: cover;" 
+                                         alt="">
+                                    <div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 260px;">
+                                            <%= l.title %>
+                                        </div>
+                                        <div class="text-muted smaller"><%= l.location %>, <%= l.country %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border rounded-pill"><%= l.category || 'General' %></span></td>
+                            <td class="fw-bold" style="color: var(--c-primary);">&#8377; <%= l.price ? l.price.toLocaleString("en-IN") : '0' %></td>
+                            <td class="small text-secondary"><%= l.maxGuests || 4 %> guests</td>
+                            <td class="small"><i class="fa-solid fa-star text-warning me-1"></i><%= l.averageRating || '4.9' %></td>
+                            <td class="text-end pe-4">
+                                <a href="/listings/<%= l._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">View</a>
+                            </td>
+                        </tr>
+                    <% } %>
+                    <% if (hostListings.length === 0) { %>
+                        <tr><td colspan="6" class="text-center text-muted py-4">No listings created yet.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

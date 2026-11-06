@@ -1,0 +1,48 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-brand-badge" style="background-color: var(--c-accent);">
+            <i class="fa-solid fa-compass"></i>
+        </div>
+        <h2 class="auth-title">Join Wanderlust</h2>
+        <p class="auth-subtitle">Create an account to start exploring and hosting extraordinary stays.</p>
+
+        <form action="/signup" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label fw-semibold small text-muted">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-regular fa-user"></i></span>
+                    <input type="text" name="username" class="form-control border-start-0 ps-0" id="username" placeholder="Choose a unique username" required>
+                    <div class="invalid-feedback">Please choose a username.</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold small text-muted">Email address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-regular fa-envelope"></i></span>
+                    <input type="email" name="email" class="form-control border-start-0 ps-0" id="email" placeholder="name@example.com" required>
+                    <div class="invalid-feedback">Please enter a valid email address.</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label fw-semibold small text-muted">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control border-start-0 ps-0" id="password" placeholder="Create a strong password" required>
+                    <div class="invalid-feedback">Please enter a password.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-auth-primary mb-3" style="background-color: var(--c-accent);">
+                Create Account
+            </button>
+        </form>
+
+        <div class="text-center small text-muted mt-3 pt-3 border-top">
+            Already have an account? <a href="/login" class="fw-bold text-dark text-decoration-underline">Log in instead</a>
+        </div>
+    </div>
+</div>

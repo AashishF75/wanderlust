@@ -1,0 +1,720 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Parking System – Advanced</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            background: #eef3f8;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url("PARKING.jpg");
+            background-size: cover;
+        }
+
+        header {
+            background: #0a74da;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 92%;
+            margin: 20px auto;
+        }
+
+
+
+        .box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #0a74da;
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        button {
+            background: #0a74da;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #004c99;
+        }
+
+        .available {
+            color: green;
+        }
+
+        .occupied {
+            color: red;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+
+
+        th {
+            background: #0a74da;
+            color: white;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>SMART PARKING SYSTEM – ADVANCED VERSION WITH MAP</header>
+
+    <div class="container">
+
+        <!-- Zone + Vehicle Details -->
+        <div class="box">
+            <h2>Assign Parking Slot</h2>
+
+            <label>Select Zone:</label><br>
+            <select id="zoneSelect">
+                <option value="A">Zone A</option>
+                <option value="B">Zone B</option>
+                <option value="C">Zone C</option>
+            </select><br><br>
+
+            <label>Vehicle Number:</label><br>
+            <input type="text" id="vehicleInput" placeholder="E.g. KA 05 AB 1234"><br><br>
+
+            <button onclick="assignSlot()">Assign Nearest Slot</button>
+
+            <p id="assignResult" style="margin-top:10px;font-size:17px;">
+                Slot Assigned: <strong>A-4</strong><br>
+                Vehicle: <strong>AP 56 8768</strong><br>
+                Entry Time: <strong>8:30:12 PM</strong>
+            </p>
+        </div>
+
+        <!-- Exit Vehicle -->
+        <div class="box">
+            <h2>Exit Vehicle &amp; Calculate Charges</h2>
+
+
+
+            <label>Enter Slot ID:</label><br>
+            <input type="text" id="exitSlotInput" placeholder="Example: A-12"><br><br>
+
+            <button onclick="exitVehicle()">Exit &amp; Calculate Charges</button>
+
+            <p id="exitResult" style="margin-top:10px;font-size:17px;"></p>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="box">
+            <h2>Parking Dashboard</h2>
+
+            <div id="liveDashboard">
+                <p><strong>A</strong> →
+                    Occupied: 4 / 10 |
+                    Free: <span style="color:green">6</span></p>
+
+                <p><strong>B</strong> →
+                    Occupied: 2 / 8 |
+                    Free: <span style="color:green">6</span></p>
+
+                <p><strong>C</strong> →
+                    Occupied: 1 / 5 |
+                    Free: <span style="color:green">4</span></p>
+            </div>
+
+            <h3>Slot Details</h3>
+            <div id="slotTable">
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Slot ID</th>
+                            <th>Status</th>
+                            <th>Vehicle No.</th>
+                            <th>Start Time</th>
+                        </tr>
+
+                        <tr>
+                            <td>A-1</td>
+                            <td class="occupied">Occupied</td>
+                            <td>KA01AB1234</td>
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>A-2</td>
+                            <td class="occupied">Occupied</td>
+                            <td>KA09CD5678</td>
+
+
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>A-3</td>
+                            <td class="occupied">Occupied</td>
+                            <td>KA05XY2222</td>
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>A-4</td>
+                            <td class="occupied">Occupied</td>
+                            <td>AP 56 8768</td>
+                            <td>8:30:12 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>A-5</td>
+                            <td class="available">Available</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td>B-1</td>
+                            <td class="occupied">Occupied</td>
+                            <td>KA22TT1111</td>
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>B-2</td>
+                            <td class="occupied">Occupied</td>
+                            <td>KA03LK9999</td>
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>B-3</td>
+                            <td class="available">Available</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td>C-1</td>
+                            <td class="occupied">Occupied</td>
+
+
+                            <td>KA08PQ3333</td>
+                            <td>8:23:03 PM</td>
+                        </tr>
+
+                        <tr>
+                            <td>C-2</td>
+                            <td class="available">Available</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MAP DISPLAY -->
+        <div class="box">
+            <h2>Nearest Slot Map</h2>
+            <div id="map"
+                class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"
+                tabindex="0" style="position: relative;">
+                <div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(-398px, 0px, 0px);">
+                    <div class="leaflet-pane leaflet-tile-pane">
+                        <div class="leaflet-layer " style="z-index: 1; opacity: 1;">
+                            <div class="leaflet-tile-container leaflet-zoom-animated"
+                                style="z-index: 19; transform: translate3d(0px, 0px, 0px) scale(1);">
+                                <img alt="" src="https://c.tile.openstreetmap.org/19/375148/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(377px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://a.tile.openstreetmap.org/19/375149/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(633px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://a.tile.openstreetmap.org/19/375148/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(377px, 210px, 0px); opacity: 1;">
+                                <img alt="" src="https://b.tile.openstreetmap.org/19/375149/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(633px, 210px, 0px); opacity: 1;">
+                                <img alt="" src="https://b.tile.openstreetmap.org/19/375147/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(121px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://b.tile.openstreetmap.org/19/375150/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(889px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://c.tile.openstreetmap.org/19/375147/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(121px, 210px, 0px); opacity: 1;">
+                                <img alt="" src="https://c.tile.openstreetmap.org/19/375150/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; 
+
+
+transform: translate3d(889px, 210px, 0px); opacity: 1;">
+                                <img alt="" src="https://a.tile.openstreetmap.org/19/375146/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(-135px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://c.tile.openstreetmap.org/19/375151/243088.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(1145px, -46px, 0px); opacity: 1;">
+                                <img alt="" src="https://b.tile.openstreetmap.org/19/375146/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(-135px, 210px, 0px); opacity: 1;">
+                                <img alt="" src="https://a.tile.openstreetmap.org/19/375151/243089.png"
+                                    class="leaflet-tile leaflet-tile-loaded"
+                                    style="width: 256px; height: 256px; transform: translate3d(1145px, 210px, 0px); opacity: 1;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="leaflet-pane leaflet-overlay-pane">
+                        <svg pointer-events="none" class="leaflet-zoom-animated" width="677" height="480"
+                            viewBox="342 -40 677 480" style="transform: translate3d(342px, -40px, 0px);">
+                            <g>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M746,238a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 ">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M709,200a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 ">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M671,161a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 ">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M634,123a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 ">
+                                </path>
+                                <path class="leaflet-interactive" stroke="green" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="green" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M597,85a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 ">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill- opacity="0.9"
+                                    fill-rule="evenodd" d="M0 0">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M0 0">
+                                </path>
+                                <path class="leaflet-interactive" stroke="green" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="green" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M0 0">
+                                </path>
+                                <path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="red" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M0 0">
+                                </path>
+                                <path class="leaflet-interactive" stroke="green" stroke-opacity="1" stroke-width="3"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="green" fill-opacity="0.9"
+                                    fill-rule="evenodd" d="M0 0">
+                                </path>
+                                <path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="4"
+                                    stroke-linecap="round" stroke-linejoin="round" fill="none" d="M717 276L642 123">
+                                </path>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="leaflet-pane leaflet-shadow-pane">
+                        <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+                            class="leaflet-marker-shadow leaflet-zoom-animated" alt=""
+                            style="margin-left: -12px; margin-top: -41px; width: 41px; height: 41px; transform: translate3d(717px, 276px, 0px);">
+                    </div>
+                    <div class="leaflet-pane leaflet-marker-pane">
+                        <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png"
+                            class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" alt="Marker"
+                            tabindex="0" role="button"
+                            style="margin-left: -12px; margin-top: -41px; width: 25px; height: 41px; transform: translate3d(717px, 276px, 0px); z-index: 276;">
+                    </div>
+                    <div class="leaflet-pane leaflet-tooltip-pane">
+                    </div>
+                    <div class="leaflet-pane leaflet-popup-pane">
+                    </div>
+                    <div class="leaflet-proxy leaflet-zoom-animated"
+                        style="transform: translate3d(9.60382e+07px, 6.22308e+07px, 0px) scale(262144);">
+                    </div>
+                </div>
+                <div class="leaflet-control-container">
+                    <div class="leaflet-top leaflet-left">
+
+
+                        <div class="leaflet-control-zoom leaflet-bar leaflet-control">
+                            <a class="leaflet-control-zoom-in leaflet-disabled" href="#" title="Zoom in" role="button"
+                                aria-label="Zoom in" aria-disabled="true">
+                                <span aria-hidden="true">+</span>
+                            </a>
+                            <a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button"
+                                aria-label="Zoom out" aria-disabled="false">
+                                <span aria-hidden="true">−</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="leaflet-top leaflet-right">
+                    </div>
+                    <div class="leaflet-bottom leaflet-left">
+                    </div>
+                    <div class="leaflet-bottom leaflet-right">
+                        <div class="leaflet-control-attribution leaflet-control">
+                            <a href="https://leafletjs.com" title="A JavaScript library for interactive maps">
+                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8"
+                                    viewBox="0 0 12 8" class="leaflet-attribution-flag">
+                                    <path fill="#4C7BE1" d="M0 0h12v4H0z">
+                                    </path>
+                                    <path fill="#FFD500" d="M0 4h12v3H0z">
+                                    </path>
+                                    <path fill="#E0BC00" d="M0 7h12v1H0z">
+                                    </path>
+                                </svg> Leaflet</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        /* -----------------------------------------------------
+           FAKE DATABASE (Frontend Simulation Only)
+        ------------------------------------------------------*/
+        let parkingZones = {
+            "A": { capacity: 10, occupied: 3 },
+            "B": { capacity: 8, occupied: 2 },
+            "C": { capacity: 5, occupied: 1 }
+        };
+
+        let parkingSlots = {
+
+
+            "A": [
+                {
+                    id: "A-1", status: "Occupied", vehicle: "KA01AB1234", start: new
+
+
+                        Date()
+                },
+                { id: "A-2", status: "Occupied", vehicle: "KA09CD5678", start: new Date() },
+                { id: "A-3", status: "Occupied", vehicle: "KA05XY2222", start: new Date() },
+                { id: "A-4", status: "Available", vehicle: null, start: null },
+                { id: "A-5", status: "Available", vehicle: null, start: null }
+            ],
+
+            "B": [
+                { id: "B-1", status: "Occupied", vehicle: "KA22TT1111", start: new Date() },
+                { id: "B-2", status: "Occupied", vehicle: "KA03LK9999", start: new Date() },
+                { id: "B-3", status: "Available", vehicle: null, start: null }
+            ],
+
+            "C": [
+                { id: "C-1", status: "Occupied", vehicle: "KA08PQ3333", start: new Date() },
+                { id: "C-2", status: "Available", vehicle: null, start: null }
+            ]
+        };
+
+
+        /* -----------------------------------------------------
+           UPDATE DASHBOARD TABLE + SUMMARY
+        ------------------------------------------------------*/
+        function updateDashboard() {
+
+            let dashboardHTML = "";
+
+            for (let zone in parkingZones) {
+                let z = parkingZones[zone];
+                let free = z.capacity - z.occupied;
+
+                dashboardHTML += `
+            <p><strong>${zone}</strong> → 
+            Occupied: ${z.occupied} / ${z.capacity} | 
+            Free: <span style="color:green">${free}</span></p>
+        `;
+            }
+
+            document.getElementById("liveDashboard").innerHTML =
+
+
+                dashboardHTML;
+
+            // Build Slot Table
+            let tableHTML = `
+       
+
+ <table>
+            <tr>
+                <th>Slot ID</th>
+                <th>Status</th>
+                <th>Vehicle No.</th>
+                <th>Start Time</th>
+            </tr>
+    `;
+
+            for (let zone in parkingSlots) {
+                parkingSlots[zone].forEach(s => {
+                    tableHTML += `
+                <tr>
+                    <td>${s.id}</td>
+                    <td class="${s.status === 'Available' ? 'available' : 'occupied'}">${s.status}</td>
+                    <td>${s.vehicle ? s.vehicle : "-"}</td>
+                    <td>${s.start ? new Date(s.start).toLocaleTimeString() : "-"}</td>
+                </tr>
+            `;
+                });
+            }
+
+            tableHTML += `</table>`;
+
+            document.getElementById("slotTable").innerHTML = tableHTML;
+        }
+
+        updateDashboard();
+
+
+        /* -----------------------------------------------------
+           LEAFLET MAP INITIALIZATION
+        ------------------------------------------------------*/
+        let map = L.map('map').setView([12.9716, 77.5946], 16);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19
+        }).addTo(map);
+
+        // Entry Gate
+        let entryGate = L.marker([12.9716, 77.5946]).addTo(map)
+
+
+            .bindPopup("Entry Gate")
+            .openPopup();
+
+
+        /* -------- Slot GPS Coordinates (Dummy values) -------- */
+        let slotCoordinates = {
+
+
+            "A-1": [12.9717, 77.5947],
+            "A-2": [12.9718, 77.5946],
+            "A-3": [12.9719, 77.5945],
+            "A-4": [12.9720, 77.5944],
+            "A-5": [12.9721, 77.5943],
+
+            "B-1": [12.9717, 77.5933],
+            "B-2": [12.9718, 77.5932],
+            "B-3": [12.9719, 77.5931],
+
+            "C-1": [12.9725, 77.5950],
+            "C-2": [12.9726, 77.5949]
+        };
+
+        let slotMarkers = {};
+        let routeLine = null;
+
+        /* -----------------------------------------------------
+           CREATE ALL SLOT MARKERS ON MAP
+        ------------------------------------------------------*/
+        function loadSlotMarkers() {
+            for (let zone in parkingSlots) {
+                parkingSlots[zone].forEach(slot => {
+                    let coord = slotCoordinates[slot.id];
+                    if (!coord) return;
+
+                    let color = slot.status === "Available" ? "green" : "red";
+
+                    let marker = L.circleMarker(coord, {
+                        radius: 8,
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.9
+                    })
+                        .bindPopup(`<b>${slot.id}</b><br>Status: ${slot.status}`)
+                        .addTo(map);
+
+                    slotMarkers[slot.id] = marker;
+                });
+            }
+
+
+        }
+
+        loadSlotMarkers();
+
+        /* Update markers when slot status changes */
+        function updateSlotMarkers() {
+            for (let zone in parkingSlots) {
+
+
+
+                parkingSlots[zone].forEach(slot => {
+                    let marker = slotMarkers[slot.id];
+                    if (!marker) return;
+
+                    let color = slot.status === "Available" ? "green" : "red";
+                    marker.setStyle({ color: color, fillColor: color });
+                    marker.bindPopup(`<b>${slot.id}</b><br>${slot.vehicle ? slot.vehicle : "Available"}`);
+                });
+            }
+        }
+
+        /* Draw route from gate → nearest slot */
+        function showRouteTo(slotId) {
+            if (!slotCoordinates[slotId]) return;
+
+            if (routeLine) map.removeLayer(routeLine);
+
+            routeLine = L.polyline(
+                [entryGate.getLatLng(), slotCoordinates[slotId]],
+                { color: "blue", weight: 4 }
+            ).addTo(map);
+
+            map.fitBounds(routeLine.getBounds());
+        }
+
+
+        /* -----------------------------------------------------
+           ASSIGN SLOT TO VEHICLE
+        ------------------------------------------------------*/
+        function assignSlot() {
+
+            let zone = document.getElementById("zoneSelect").value;
+            let vehicleNo = document.getElementById("vehicleInput").value.trim();
+
+            if (vehicleNo === "") {
+                alert("Please enter a vehicle number!");
+                return;
+
+
+            }
+
+            // Find nearest empty slot
+            let slot = parkingSlots[zone].find(s => s.status === "Available");
+
+            if (!slot) {
+                document.getElementById("assignResult").innerHTML =
+                    `<span style="color:red">No available slots in Zone ${zone}</span>`;
+                return;
+            }
+
+
+            // Assign slot
+            slot.status = "Occupied";
+            slot.vehicle = vehicleNo;
+            slot.start = new Date();
+            parkingZones[zone].occupied++;
+
+            document.getElementById("assignResult").innerHTML = `
+        Slot Assigned: <strong>${slot.id}</strong><br>
+        Vehicle: <strong>${vehicleNo}</strong><br>
+        Entry Time: <strong>${slot.start.toLocaleTimeString()}</strong>
+    `;
+
+            updateDashboard();
+            updateSlotMarkers();
+            showRouteTo(slot.id);
+        }
+
+
+        /* -----------------------------------------------------
+           EXIT VEHICLE + BILLING
+        ------------------------------------------------------*/
+        function exitVehicle() {
+            let slotId = document.getElementById("exitSlotInput").value.trim();
+
+            if (slotId === "") {
+                alert("Enter Slot ID");
+                return;
+            }
+
+            let zone = slotId.split("-")[0];
+
+            if (!parkingSlots[zone]) {
+                document.getElementById("exitResult").innerHTML =
+                    `<span style="color:red">Invalid Slot ID</span>`;
+                return;
+            }
+
+
+            let slot = parkingSlots[zone].find(s => s.id === slotId);
+
+            if (!slot || slot.status === "Available") {
+                document.getElementById("exitResult").innerHTML =
+                    `<span style="color:red">Slot is already empty</span>`;
+                return;
+            }
+
+            // Calculate billing
+            let endTime = new Date();
+            let durationHours = Math.ceil((endTime - slot.start) / (1000 * 60 * 60));
+
+
+            let charges = durationHours * 10; // ₹10/hour
+
+            // Make slot free again
+            slot.status = "Available";
+            slot.vehicle = null;
+            slot.start = null;
+
+            parkingZones[zone].occupied--;
+
+            document.getElementById("exitResult").innerHTML = `
+        Vehicle exited from <strong>${slotId}</strong><br>
+        Parking Time: <strong>${durationHours} hours</strong><br>
+        Parking Charges: <strong>₹${charges}</strong>
+    `;
+
+            updateDashboard();
+            updateSlotMarkers();
+        }
+
+    </script>
+
+
+
+</body>
+
+</html>

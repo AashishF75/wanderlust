@@ -1,0 +1,95 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card p-4 p-md-5 rounded-4 border shadow-sm bg-white">
+                <div class="mb-4">
+                    <span class="badge rounded-pill mb-2 bg-dark text-white">Edit Mode</span>
+                    <h2 class="fw-bold mb-1" style="color: var(--c-primary);">Edit Property Details</h2>
+                    <p class="text-muted small">Update your listing information, pricing, or upload a new photo.</p>
+                </div>
+
+                <form action="/listings/<%= listings._id %>?_method=PUT" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold small text-muted">Title</label>
+                        <input type="text" id="title" name="listing[title]" value="<%= listings.title %>" class="form-control" required>
+                        <div class="invalid-feedback">Please enter a valid title.</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold small text-muted">Description</label>
+                        <textarea id="description" name="listing[description]" class="form-control" rows="4" required><%= listings.description %></textarea>
+                        <div class="invalid-feedback">Please enter a description.</div>
+                    </div>
+
+                    <!-- Category & Price -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="category" class="form-label fw-semibold small text-muted">Category</label>
+                            <select name="listing[category]" id="category" class="form-select">
+                                <option value="Trending" <%= listings.category === 'Trending' ? 'selected' : '' %>>Trending</option>
+                                <option value="Room" <%= listings.category === 'Room' ? 'selected' : '' %>>Room</option>
+                                <option value="City" <%= listings.category === 'City' ? 'selected' : '' %>>City</option>
+                                <option value="Mountain" <%= listings.category === 'Mountain' ? 'selected' : '' %>>Mountain</option>
+                                <option value="Cottage" <%= listings.category === 'Cottage' ? 'selected' : '' %>>Cottage</option>
+                                <option value="Pool" <%= listings.category === 'Pool' ? 'selected' : '' %>>Pool</option>
+                                <option value="Farms" <%= listings.category === 'Farms' ? 'selected' : '' %>>Farms</option>
+                                <option value="Camping" <%= listings.category === 'Camping' ? 'selected' : '' %>>Camping</option>
+                                <option value="Arctic" <%= listings.category === 'Arctic' ? 'selected' : '' %>>Arctic</option>
+                                <option value="Doms" <%= listings.category === 'Doms' ? 'selected' : '' %>>Doms</option>
+                                <option value="Sailboats" <%= listings.category === 'Sailboats' ? 'selected' : '' %>>Sailboats</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="price" class="form-label fw-semibold small text-muted">Price per Night (INR)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">&#8377;</span>
+                                <input type="number" id="price" name="listing[price]" value="<%= listings.price %>" class="form-control" min="0" required>
+                                <div class="invalid-feedback">Please enter a valid price.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location & Country -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label fw-semibold small text-muted">Location</label>
+                            <input type="text" id="location" name="listing[location]" value="<%= listings.location %>" class="form-control" required>
+                            <div class="invalid-feedback">Please enter the location.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="country" class="form-label fw-semibold small text-muted">Country</label>
+                            <input type="text" id="country" name="listing[country]" value="<%= listings.country %>" class="form-control" required>
+                            <div class="invalid-feedback">Please enter the country.</div>
+                        </div>
+                    </div>
+
+                    <!-- Current Image Preview -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted d-block">Current Property Image</label>
+                        <div class="p-2 border rounded-3 d-inline-block bg-light">
+                            <img src="<%= originalImageurl %>" alt="Current Image" class="rounded-2" style="max-height: 140px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <!-- New Upload Optional -->
+                    <div class="mb-4">
+                        <label for="image" class="form-label fw-semibold small text-muted">Upload New Image (Optional)</label>
+                        <input type="file" id="image" name="listing[image]" class="form-control" accept="image/png, image/jpeg, image/jpg">
+                        <div class="form-text small text-muted">Leave empty to keep your current photo.</div>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <button type="submit" class="btn btn-auth-primary px-4 py-2 w-auto">
+                            <i class="fa-solid fa-check me-1"></i> Save Changes
+                        </button>
+                        <a href="/listings/<%= listings._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

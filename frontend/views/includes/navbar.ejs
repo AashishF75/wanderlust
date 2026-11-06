@@ -1,0 +1,162 @@
+<nav class="navbar navbar-expand-lg navbar-wanderlust">
+    <div class="container-fluid px-lg-4">
+        <!-- Brand Identity -->
+        <a class="brand-logo" href="/listings">
+            <div class="brand-icon">
+                <i class="fa-solid fa-compass"></i>
+            </div>
+            <span>Wanderlust</span>
+        </a>
+
+        <!-- Center Search Pill (Desktop/Tablet) -->
+        <form class="nav-search-form d-none d-md-flex ms-auto me-3 my-auto" action="/listings/search" method="GET">
+            <input class="nav-search-input" type="search" name="q" placeholder="Search destinations, cities, or stays...">
+            <button class="nav-search-btn" type="submit" aria-label="Search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </form>
+
+        <!-- Mobile Toggler -->
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarWanderlustContent" aria-controls="navbarWanderlustContent" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars fs-4 text-dark"></i>
+        </button>
+
+        <!-- Nav Links & User Controls -->
+        <div class="collapse navbar-collapse" id="navbarWanderlustContent">
+            <!-- Mobile Search Bar (Visible only on mobile collapse) -->
+            <form class="nav-search-form d-flex d-md-none w-100 my-2" action="/listings/search" method="GET">
+                <input class="nav-search-input" type="search" name="q" placeholder="Search destinations...">
+                <button class="nav-search-btn" type="submit" aria-label="Search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item">
+                    <a class="nav-action-link <%= (typeof currentPath !== 'undefined' && currentPath === '/listings') ? 'active' : '' %>" href="/listings">Explore</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-action-link <%= (typeof currentPath !== 'undefined' && currentPath === '/listings/map') ? 'active' : '' %>" href="/listings/map">
+                        <i class="fa-solid fa-map-location-dot me-1 text-accent"></i> Map
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="host-badge-btn nav-link" href="/listings/new">
+                        <i class="fa-solid fa-house-chimney me-1 text-accent"></i> Host your home
+                    </a>
+                </li>
+
+                <!-- Authenticated Links -->
+                <% if (curruser) { %>
+                    <li class="nav-item">
+                        <a class="nav-action-link <%= (typeof currentPath !== 'undefined' && currentPath === '/wishlist') ? 'active' : '' %>" href="/wishlist">
+                            <i class="fa-solid fa-heart me-1 text-danger"></i> Wishlist
+                            <% if (curruser.wishlist && curruser.wishlist.length > 0) { %>
+                                <span class="badge rounded-pill bg-danger ms-1" style="font-size: 0.7rem;"><%= curruser.wishlist.length %></span>
+                            <% } %>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-action-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/bookings')) ? 'active' : '' %>" href="/bookings">
+                            <i class="fa-solid fa-suitcase-rolling me-1 text-accent"></i> My Trips
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-action-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/messages')) ? 'active' : '' %>" href="/messages" title="Messages">
+                            <i class="fa-regular fa-message me-1 text-primary"></i> Messages
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-action-link position-relative <%= (typeof currentPath !== 'undefined' && currentPath === '/notifications') ? 'active' : '' %>" href="/notifications" title="Notifications">
+                            <i class="fa-regular fa-bell"></i>
+                            <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    <%= unreadNotificationCount > 9 ? '9+' : unreadNotificationCount %>
+                                </span>
+                            <% } %>
+                        </a>
+                    </li>
+                <% } %>
+
+                <!-- User Dropdown or Auth Links -->
+                <% if (!curruser) { %>
+                    <li class="nav-item ms-lg-2">
+                        <a class="nav-action-link" href="/login">Log in</a>
+                    </li>
+                    <li class="nav-item ms-lg-1">
+                        <a class="btn btn-sm text-white fw-bold px-3 py-2 rounded-pill" style="background-color: var(--c-primary);" href="/signup">Sign up</a>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item dropdown ms-lg-2">
+                        <div class="user-menu-pill dropdown-toggle" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar-circle">
+                                <%= curruser.username.charAt(0).toUpperCase() %>
+                            </div>
+                            <span class="d-none d-sm-inline fw-semibold text-dark"><%= curruser.username %></span>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" aria-labelledby="userMenuDropdown">
+                            <li class="px-3 py-2 text-muted small border-bottom">
+                                Signed in as <strong class="text-dark"><%= curruser.username %></strong>
+                                <% if (curruser.role === 'admin') { %>
+                                    <span class="badge bg-warning text-dark ms-1">Admin</span>
+                                <% } %>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 <%= (typeof currentPath !== 'undefined' && currentPath === '/bookings') ? 'active' : '' %>" href="/bookings">
+                                    <i class="fa-solid fa-suitcase-rolling me-2 text-accent"></i> My Trips & Reservations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 <%= (typeof currentPath !== 'undefined' && currentPath === '/bookings/host') ? 'active' : '' %>" href="/bookings/host">
+                                    <i class="fa-solid fa-house-chimney-user me-2 text-success"></i> Host Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 <%= (typeof currentPath !== 'undefined' && currentPath === '/bookings/host/analytics') ? 'active' : '' %>" href="/bookings/host/analytics">
+                                    <i class="fa-solid fa-chart-line me-2 text-info"></i> Host Analytics & Earnings
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/messages')) ? 'active' : '' %>" href="/messages">
+                                    <i class="fa-regular fa-message me-2 text-primary"></i> Messages Inbox
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 <%= (typeof currentPath !== 'undefined' && currentPath === '/wishlist') ? 'active' : '' %>" href="/wishlist">
+                                    <i class="fa-solid fa-heart me-2 text-danger"></i> Saved Stays (<%= (curruser.wishlist && curruser.wishlist.length) || 0 %>)
+                                </a>
+                            </li>
+                            <% if (curruser.role === 'admin') { %>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 rounded-3 fw-bold" href="/admin" style="background-color: rgba(217, 139, 97, 0.1); color: var(--c-primary);">
+                                        <i class="fa-solid fa-shield-halved me-2 text-accent"></i> Admin Console
+                                    </a>
+                                </li>
+                            <% } %>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3" href="/listings/new">
+                                    <i class="fa-solid fa-plus me-2 text-muted"></i> Add new listing
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3" href="/listings">
+                                    <i class="fa-solid fa-compass me-2 text-muted"></i> Explore all stays
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-3 text-danger" href="/logout">
+                                    <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log out
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
